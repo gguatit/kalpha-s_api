@@ -45,6 +45,11 @@ export const DOCS_HTML = `<!doctype html>
     <p>curl 예시:</p>
     <pre id="c1"><code>curl -i -X POST https://api.kalpha.kr/store \
   -H "Content-Type: application/json" \
+  -d '{"message":"내 비밀번호는 1234"}'
+
+# 로컬 테스트(로컬에서 개발 서버 실행시)
+curl -i -X POST http://127.0.0.1:8787/store \
+  -H "Content-Type: application/json" \
   -d '{"message":"내 비밀번호는 1234"}'</code></pre>
     <button id="c1-btn" class="btn" onclick="copyCode('c1')">복사</button>
 
@@ -66,7 +71,10 @@ console.log(data); // { id: '...', ttl_seconds: 3600 }</code></pre>
     <p>실패 응답: <code>404 Not Found</code> — 이미 읽었거나 만료된 ID</p>
 
     <p>curl 예시:</p>
-    <pre id="c2"><code>curl -i https://api.kalpha.kr/read/&lt;UUID&gt;</code></pre>
+    <pre id="c2"><code>curl -i https://api.kalpha.kr/read/&lt;UUID&gt;
+
+  # 로컬 테스트
+  curl -i http://127.0.0.1:8787/read/&lt;UUID&gt;</code></pre>
     <button id="c2-btn" class="btn" onclick="copyCode('c2')">복사</button>
 
     <p>JavaScript 예시:</p>

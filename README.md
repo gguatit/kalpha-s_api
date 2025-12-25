@@ -27,7 +27,13 @@ npx wrangler publish
 - 저장:
 
 ```bash
-curl -X POST https://your-worker-kalpha/api/store \
+# Example (deployed):
+curl -X POST https://api.kalpha.kr/store \
+	-H "Content-Type: application/json" \
+	-d '{"message":"내 비밀번호는 1234"}'
+
+# Local dev (run `npm run dev` first)
+curl -X POST http://127.0.0.1:8787/store \
 	-H "Content-Type: application/json" \
 	-d '{"message":"내 비밀번호는 1234"}'
 ```

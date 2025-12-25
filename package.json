@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "build": "wrangler build",
+    "dev": "wrangler dev",
     "deploy": "wrangler publish"
   },
   "devDependencies": {
