@@ -67,10 +67,9 @@ export default {
       return new Response(DOCS_HTML, { status: 200, headers: { 'content-type': 'text/html; charset=utf-8', ...defaultCorsHeaders } });
     }
 
-    // 루트 접근 시 /docs로 리디렉션
+    // 루트 접근 시 바로 문서 페이지 반환 (메인으로 사용)
     if (request.method === 'GET' && pathname === '/') {
-      const docsUrl = new URL('/docs', request.url).toString();
-      return Response.redirect(docsUrl, 302);
+      return new Response(DOCS_HTML, { status: 200, headers: { 'content-type': 'text/html; charset=utf-8', ...defaultCorsHeaders } });
     }
 
     return new Response('Not Found', { status: 404 });
