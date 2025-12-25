@@ -50,11 +50,38 @@ const DOCS_HTML = `<!doctype html>
 
         <section class="panel" id="examples">
           <h2>Examples</h2>
-          <pre id="js-example">const res = await fetch('https://api.kalpha.kr/store', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:'비밀'})});const j=await res.json();console.log(j);</pre>
-          <button class="copy" onclick="navigator.clipboard.writeText(document.getElementById('js-example').innerText)">복사</button>
-          <h4>Local</h4>
-          <pre id="local-example">curl -i -X POST http://127.0.0.1:8787/store -H "Content-Type: application/json" -d '{"message":"test"}'</pre>
+          <p class="muted">간단한 사용 예시들 — 필요에 따라 `Authorization` 헤더를 추가하세요(배포에 `API_KEY` 설정 시).</p>
+          <h4>cURL (배포) — id를 헤더에서 확인</h4>
+          <pre id="post-example">curl -i -X POST https://api.kalpha.kr/store \
+        -H "Content-Type: application/json" \
+        -d '{"message":"내 비밀번호는 1234"}'</pre>
+          <button class="copy" onclick="navigator.clipboard.writeText(document.getElementById('post-example').innerText)">복사</button>
+
+          <h4>cURL (로컬 개발)</h4>
+          <pre id="local-example">curl -i -X POST http://127.0.0.1:8787/store \
+        -H "Content-Type: application/json" \
+        -d '{"message":"테스트 메시지"}'</pre>
           <button class="copy" onclick="navigator.clipboard.writeText(document.getElementById('local-example').innerText)">복사</button>
+
+          <h4>JavaScript (fetch)</h4>
+          <pre id="js-example">const res = await fetch('https://api.kalpha.kr/store', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({message: '비밀'})
+      });
+      const j = await res.json();
+      console.log(j); // { id: '...' }</pre>
+          <button class="copy" onclick="navigator.clipboard.writeText(document.getElementById('js-example').innerText)">복사</button>
+
+          <h4>인증이 활성화된 경우</h4>
+          <pre id="auth-example">curl -i -X POST https://api.kalpha.kr/store \
+        -H "Authorization: Bearer $API_KEY" \
+        -H "Content-Type: application/json" \
+        -d '{"message":"비밀"}'</pre>
+          <button class="copy" onclick="navigator.clipboard.writeText(document.getElementById('auth-example').innerText)">복사</button>
+
+          <h4>클라이언트 측 암호화(E2EE) 권장</h4>
+          <p class="muted">운영자가 메시지를 보지 못하게 하려면 클라이언트에서 메시지를 암호화한 후 암호문을 저장하세요. 서버는 암호문만 보관합니다.</p>
         </section>
 
         <section class="panel" id="responses">
@@ -97,7 +124,7 @@ const DOCS_HTML = `<!doctype html>
       </main>
     </div>
 
-    <footer>문의/개선 요청: repository 관리자에게 연락하세요.</footer>
+    <footer>문의/개선 요청: <a href="mailto:dev@kalpha.kr">dev@kalpha.kr</a> · <a href="https://github.com/gguatit/">https://github.com/gguatit/</a></footer>
   </div>
 </body>
 </html>`;
