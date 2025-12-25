@@ -50,7 +50,7 @@ const DOCS_HTML = `<!doctype html>
 
         <section class="panel" id="examples">
           <h2>Examples</h2>
-          <p class="muted">간단한 사용 예시들 — 필요에 따라 `Authorization` 헤더를 추가하세요(배포에 `API_KEY` 설정 시).</p>
+          <p class="muted">간단한 사용 예시들 — 필요에 따라 <code>Authorization</code> 헤더를 추가하세요(배포에 <code>API_KEY</code> 설정 시).</p>
           <h4>cURL (배포) — id를 헤더에서 확인</h4>
           <pre id="post-example">curl -i -X POST https://api.kalpha.kr/store \
         -H "Content-Type: application/json" \
