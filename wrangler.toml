@@ -1,8 +1,8 @@
-name = "kalpha-deaddrop"
+name = "api"
 main = "src/index.ts"
 compatibility_date = "2025-12-25"
 type = "javascript"
 
 kv_namespaces = [
-  { binding = "DEAD_DROP", id = "" }
+  { binding = "DEAD_DROP", id = "35daf343d0244b989e423bf1bc0baf5e" }
 ]
