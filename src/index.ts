@@ -33,18 +33,33 @@ const DOCS_HTML = `<!doctype html>
 
       <main>
         <section class="panel" id="endpoints">
-          <h2>Endpoints</h2>
-          <p class="muted">간단히: POST <code>/store</code> → 저장(1시간), GET <code>/read/:id</code> → 한 번만 읽기</p>
-          <h3>POST /store</h3>
-          <p>요청: <code>Content-Type: application/json</code>, body: <code>{"message":"..."}</code></p>
+          <h2>이 API는 무엇을 하나요?</h2>
+          <p class="muted">간단히 말해, "한 번만 읽히는" 임시 비밀 메시지를 전달하도록 설계된 서비스입니다. 아래처럼 작동합니다.</p>
+
+          <h3>작동 방식 (아주 쉽게)</h3>
+          <ol>
+            <li>보내는 사람은 메시지를 <code>POST /store</code>로 보냅니다.</li>
+            <li>서버는 메시지를 임시 저장하고 고유한 식별자(<code>id</code>)를 발급합니다. 이 id는 링크 형태(<code>/read/&lt;id&gt;</code>)로도 제공됩니다.</li>
+            <li>받는 사람은 그 id로 <code>GET /read/:id</code>를 호출하면 메시지를 받아보고, 서버는 즉시 그 메시지를 삭제합니다(한 번만 읽힘).</li>
+          </ol>
+
+          <h3>중요한 점</h3>
+          <ul>
+            <li>메시지는 최대 1시간 동안 보관(기본 TTL 1시간)됩니다. 시간이 지나면 자동 삭제됩니다.</li>
+            <li>한 번 읽으면 곧바로 삭제되므로 같은 id로 두 번 읽을 수 없습니다.</li>
+            <li>서비스 운영자는 저장된 메시지를 볼 수 있으므로, 운영자가 내용을 볼 수 없게 하려면 클라이언트에서 직접 암호화한 뒤 암호문을 저장하세요(종단간 암호화).</li>
+          </ul>
+
+          <h3>간단한 요청 형식</h3>
+          <p>메시지를 저장하려면 JSON으로 <code>{ "message": "여기에 비밀" }</code> 를 전송하세요.</p>
           <pre id="post-example">curl -i -X POST https://api.kalpha.kr/store \
   -H "Content-Type: application/json" \
   -d '{"message":"내 비밀번호는 1234"}'</pre>
           <button class="copy" onclick="navigator.clipboard.writeText(document.getElementById('post-example').innerText)">복사</button>
 
-          <h3>GET /read/:id</h3>
-          <p>발급된 ID로 한 번만 조회, 조회 즉시 삭제</p>
-          <pre id="get-example">curl -i https://api.kalpha.kr/read/&lt;UUID&gt;</pre>
+          <h3>메시지 읽기</h3>
+          <p>발급된 링크(또는 id)를 사용해 호출하면 메시지를 받고 바로 삭제됩니다.</p>
+          <pre id="get-example">curl -i https://api.kalpha.kr/read/&lt;id&gt;</pre>
           <button class="copy" onclick="navigator.clipboard.writeText(document.getElementById('get-example').innerText)">복사</button>
         </section>
 
@@ -147,7 +162,7 @@ nav a{color:var(--white);text-decoration:none;padding:8px 10px;border-radius:8px
 pre{background:#001018;padding:14px;border-radius:8px;color:#cfeefb;overflow:auto;font-size:13px;white-space:pre-wrap;word-break:break-word}
 .muted{color:var(--muted)}
 .copy{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;background:linear-gradient(90deg,#06b6d4,#60a5fa);color:#05212a;border-radius:10px;border:none;cursor:pointer;font-size:13px;font-weight:600;box-shadow:0 8px 20px rgba(6,182,212,0.12);transition:transform .12s ease,box-shadow .12s ease,opacity .12s}
-.copy::before{content:"\1F4CB";font-size:14px}
+.copy::before{content:"📋";font-size:14px}
 .copy:hover{transform:translateY(-3px);box-shadow:0 14px 30px rgba(6,182,212,0.18)}
 .copy:active{transform:translateY(-1px)}
 .copy:focus{outline:2px solid rgba(6,182,212,0.22);outline-offset:3px}
