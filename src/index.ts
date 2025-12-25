@@ -84,8 +84,10 @@ const DOCS_HTML = `<!doctype html>
 </body>
 </html>`;
 const DOCS_CSS = `:root{--bg:#0f172a;--card:#0b1220;--muted:#94a3b8;--accent:#06b6d4;--white:#ecfeff}
-body{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;margin:0;background:linear-gradient(180deg,#071029 0%, #021120 100%);color:var(--white)}
-.wrap{max-width:1100px;margin:36px auto;padding:28px}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:36px;background:linear-gradient(180deg,#071029 0%, #021120 100%);color:var(--white);overflow-x:hidden}
+.wrap{width:100%;max-width:1100px;margin:0 auto;padding:28px}
 .header{display:flex;align-items:center;justify-content:space-between;gap:16px}
 .logo{display:flex;align-items:center;gap:12px}
 .logo .mark{width:44px;height:44px;background:linear-gradient(135deg,#06b6d4,#60a5fa);border-radius:8px;display:inline-block}
@@ -95,7 +97,7 @@ h1{margin:0;font-size:20px}
 .panel{background:rgba(255,255,255,0.04);padding:18px;border-radius:12px}
 nav ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px}
 nav a{color:var(--white);text-decoration:none;padding:8px 10px;border-radius:8px;display:block}
-pre{background:#001018;padding:14px;border-radius:8px;color:#cfeefb;overflow:auto;font-size:13px}
+pre{background:#001018;padding:14px;border-radius:8px;color:#cfeefb;overflow:auto;font-size:13px;white-space:pre-wrap;word-break:break-word}
 .muted{color:var(--muted)}
 .copy{display:inline-block;margin-left:8px;padding:6px 10px;background:#064e64;color:#e6fffb;border-radius:8px;cursor:pointer;font-size:13px}
 .badge{display:inline-block;background:#052f3a;padding:6px 8px;border-radius:8px;color:#a5f3fc;font-size:12px}
