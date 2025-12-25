@@ -1,6 +1,8 @@
 export interface Env {
   DEAD_DROP: KVNamespace;
+  API_KEY?: string;
 }
+ 
 
 const DOCS_HTML = `<!doctype html>
 <html lang="ko">
@@ -106,6 +108,9 @@ pre{background:#001018;padding:14px;border-radius:8px;color:#cfeefb;overflow:aut
 footer{margin-top:18px;color:var(--muted);font-size:13px}
 @media (max-width:880px){.layout{grid-template-columns:1fr}.logo .mark{display:none}}`;
 
+// Limits
+const MAX_MESSAGE_LENGTH = 2000; // max characters allowed for stored messages
+
 export default {
   async fetch(request: Request, env: Env) {
     const url = new URL(request.url);
@@ -122,9 +127,26 @@ export default {
       return new Response(JSON.stringify(obj), { status, headers: { 'content-type': 'application/json', ...defaultCorsHeaders } });
     };
 
+    // If env.API_KEY is set, require Bearer token for API endpoints (/store, /read)
+    const requireAuth = (request: Request, env: Env, pathname: string) => {
+      if (!env.API_KEY) return null; // auth not enabled
+      // only protect API endpoints
+      if (!(pathname === '/store' || pathname.startsWith('/read/'))) return null;
+      const auth = (request.headers.get('authorization') || '').trim();
+      if (auth.toLowerCase().startsWith('bearer ')) {
+        const token = auth.slice(7).trim();
+        if (token === env.API_KEY) return null;
+      }
+      return new Response(JSON.stringify({ error: 'unauthorized' }), { status: 401, headers: { 'content-type': 'application/json', ...defaultCorsHeaders } });
+    };
+
     if (request.method === 'OPTIONS') {
       return new Response(null, { status: 204, headers: defaultCorsHeaders });
     }
+
+    // authentication (optional): if env.API_KEY is set, require Bearer token
+    const authFail = requireAuth(request, env, pathname);
+    if (authFail) return authFail;
 
     if (request.method === 'POST' && pathname === '/store') {
       try {
@@ -140,11 +162,23 @@ export default {
         if (!message || typeof message !== 'string') {
           return jsonResponse({ error: 'missing message' }, 400);
         }
+        if (message.length > MAX_MESSAGE_LENGTH) {
+          return jsonResponse({ error: 'message too long' }, 413);
+        }
 
         const id = crypto.randomUUID();
         await env.DEAD_DROP.put(id, message, { expirationTtl: 3600 });
 
-        return jsonResponse({ id, ttl_seconds: 3600 }, 201);
+        // Return JSON body and include headers so `curl -i` shows the id immediately.
+        const respBody = JSON.stringify({ id, ttl_seconds: 3600 });
+        const respHeaders = {
+          'content-type': 'application/json',
+          'Location': `${url.origin}/read/${id}`,
+          'X-DeadDrop-Id': id,
+          ...defaultCorsHeaders
+        } as Record<string, string>;
+
+        return new Response(respBody, { status: 201, headers: respHeaders });
       } catch (e) {
         return jsonResponse({ error: 'invalid body' }, 400);
       }
