@@ -146,7 +146,11 @@ nav ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap
 nav a{color:var(--white);text-decoration:none;padding:8px 10px;border-radius:8px;display:block}
 pre{background:#001018;padding:14px;border-radius:8px;color:#cfeefb;overflow:auto;font-size:13px;white-space:pre-wrap;word-break:break-word}
 .muted{color:var(--muted)}
-.copy{display:inline-block;margin-left:8px;padding:6px 10px;background:#064e64;color:#e6fffb;border-radius:8px;cursor:pointer;font-size:13px}
+.copy{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;background:linear-gradient(90deg,#06b6d4,#60a5fa);color:#05212a;border-radius:10px;border:none;cursor:pointer;font-size:13px;font-weight:600;box-shadow:0 8px 20px rgba(6,182,212,0.12);transition:transform .12s ease,box-shadow .12s ease,opacity .12s}
+.copy::before{content:"\1F4CB";font-size:14px}
+.copy:hover{transform:translateY(-3px);box-shadow:0 14px 30px rgba(6,182,212,0.18)}
+.copy:active{transform:translateY(-1px)}
+.copy:focus{outline:2px solid rgba(6,182,212,0.22);outline-offset:3px}
 .badge{display:inline-block;background:#052f3a;padding:6px 8px;border-radius:8px;color:#a5f3fc;font-size:12px}
 footer{margin-top:18px;color:var(--muted);font-size:13px}
 @media (max-width:880px){.layout{grid-template-columns:1fr}.logo .mark{display:none}}`;
