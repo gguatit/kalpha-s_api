@@ -66,11 +66,6 @@ npx wrangler publish
 curl -i -X POST https://api.kalpha.kr/store \
 	-H "Content-Type: application/json" \
 	-d '{"message":"내 비밀번호는 1234"}'
-
-# Local dev (run `npm run dev` first)
-curl -i -X POST http://127.0.0.1:8787/store \
-	-H "Content-Type: application/json" \
-	-d '{"message":"내 비밀번호는 1234"}'
 ```
 
 - 읽기 (한 번만 가능):

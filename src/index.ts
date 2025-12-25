@@ -72,11 +72,7 @@ const DOCS_HTML = `<!doctype html>
         -d '{"message":"내 비밀번호는 1234"}'</pre>
           <button class="copy" onclick="navigator.clipboard.writeText(document.getElementById('post-example').innerText)">복사</button>
 
-          <h4>cURL (로컬 개발)</h4>
-          <pre id="local-example">curl -i -X POST http://127.0.0.1:8787/store \
-        -H "Content-Type: application/json" \
-        -d '{"message":"테스트 메시지"}'</pre>
-          <button class="copy" onclick="navigator.clipboard.writeText(document.getElementById('local-example').innerText)">복사</button>
+          
 
           <h4>JavaScript (fetch)</h4>
           <pre id="js-example">const res = await fetch('https://api.kalpha.kr/store', {
