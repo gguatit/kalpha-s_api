@@ -67,23 +67,10 @@ export default {
       return new Response(DOCS_HTML, { status: 200, headers: { 'content-type': 'text/html; charset=utf-8', ...defaultCorsHeaders } });
     }
 
-    // 안내 페이지: 루트로 접근 시 간단한 사용법 반환
+    // 루트 접근 시 /docs로 리디렉션
     if (request.method === 'GET' && pathname === '/') {
-      const html = `<!doctype html>
-<html>
-<head><meta charset="utf-8"><title>Dead Drop API</title></head>
-<body>
-  <h1>Dead Drop — API</h1>
-  <p>사용법:</p>
-  <ul>
-    <li>POST /store — JSON {"message":"..."} 으로 비밀 저장 (TTL 1시간)</li>
-    <li>GET /read/:id — 한 번만 읽기, 읽는 즉시 삭제</li>
-  </ul>
-  <p>예: <code>curl -X POST /store -H "Content-Type: application/json" -d '{"message":"hi"}'</code></p>
-</body>
-</html>`;
-
-      return new Response(html, { status: 200, headers: { 'content-type': 'text/html; charset=utf-8', ...defaultCorsHeaders } });
+      const docsUrl = new URL('/docs', request.url).toString();
+      return Response.redirect(docsUrl, 302);
     }
 
     return new Response('Not Found', { status: 404 });
