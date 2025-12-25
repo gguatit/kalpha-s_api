@@ -59,15 +59,31 @@ const DOCS_HTML = `<!doctype html>
 
         <section class="panel" id="responses">
           <h2>Responses</h2>
-          <pre>// POST /store (201)
-{"id":"...","ttl_seconds":3600}
+          <p class="muted">응답은 간단하고 예측 가능합니다. 아래 예시에서는 본문(JSON)과 관련 응답 헤더를 함께 보여줍니다.</p>
+          <h4>POST /store (성공)</h4>
+          <pre>// HTTP 201
+      {"id":"..."}
 
-// GET /read/:id (200)
-{"message":"..."}
+      # 응답 헤더 예시
+      Location: https://api.kalpha.kr/read/&lt;id&gt;
+      X-DeadDrop-Id: &lt;id&gt;</pre>
 
-// Errors
-{"error":"missing message"}
-{"error":"not found or already read"}</pre>
+          <h4>GET /read/:id (성공)</h4>
+          <pre>// HTTP 200
+      {"message":"..."}</pre>
+
+          <h4>오류</h4>
+          <pre>// 400 잘못된 요청
+      {"error":"missing message"}
+
+      // 404 찾을 수 없거나 이미 읽힘
+      {"error":"not found or already read"}
+
+      // 401 인증 실패 (env.API_KEY 설정 시)
+      {"error":"unauthorized"}
+
+      // 413 메시지 길이 초과
+      {"error":"message too long"}</pre>
         </section>
 
         <section class="panel" id="ops">
@@ -170,7 +186,7 @@ export default {
         await env.DEAD_DROP.put(id, message, { expirationTtl: 3600 });
 
         // Return JSON body and include headers so `curl -i` shows the id immediately.
-        const respBody = JSON.stringify({ id, ttl_seconds: 3600 });
+        const respBody = JSON.stringify({ id });
         const respHeaders = {
           'content-type': 'application/json',
           'Location': `${url.origin}/read/${id}`,

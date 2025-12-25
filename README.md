@@ -11,6 +11,31 @@ Dead Drop — 1회용 암호화 비밀 메시지 저장소 (Cloudflare Workers +
 - 선택적 인증: 배포 환경에 `API_KEY`(Worker 환경 변수 또는 비밀) 를 설정하면 `Authorization: Bearer <API_KEY>` 헤더가 없으면 `/store` 및 `/read/:id` 접근이 차단됩니다(기본은 인증 없음).
 - 메시지 길이 제한: 저장되는 메시지는 기본 최대 2000자(`MAX_MESSAGE_LENGTH`)로 제한됩니다.
 
+응답 형식(요약)
+- POST /store (성공): HTTP 201, 본문 `{ "id": "<uuid>" }`. 또한 응답 헤더에 `Location: /read/<id>` 및 `X-DeadDrop-Id: <id>`를 포함합니다.
+- GET /read/:id (성공): HTTP 200, 본문 `{ "message": "..." }`.
+- 오류: HTTP 4xx로 본문 `{ "error": "..." }` 반환.
+
+예시 응답
+- 저장 성공 (본문):
+
+```json
+{"id":"abc-123"}
+```
+
+응답 헤더 예시:
+
+```
+Location: https://api.kalpha.kr/read/abc-123
+X-DeadDrop-Id: abc-123
+```
+
+오류 예시:
+
+```json
+{"error":"missing message"}
+```
+
 주의 및 권장사항
 - 현재 저장소는 Workers KV를 사용하며 `get` 후 `delete` 방식으로 읽기-삭제를 수행합니다. 이 방식은 완전한 원자성을 보장하지 않으므로 동시 읽기 상황에서 두 번 이상 읽힐 가능성이 있습니다. 원자성이 필요하면 Durable Object로 전환을 권장합니다.
 - 공개 API로 둘 경우 스팸·남용 위험이 있으니 인증, 레이트리밋, 길이 제한을 적용하세요.
