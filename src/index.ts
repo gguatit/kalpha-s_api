@@ -1,8 +1,106 @@
-import { DOCS_HTML } from './docs';
-
 export interface Env {
   DEAD_DROP: KVNamespace;
 }
+
+const DOCS_HTML = `<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Dead Drop API Docs</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <div class="wrap">
+    <header class="header">
+      <div class="logo"><span class="mark"></span><div><h1>Dead Drop</h1><div class="subtitle">한 번만 읽을 수 있는 일회성 비밀 메시지 저장소</div></div></div>
+      <div class="meta"><span class="badge">TTL 1시간</span></div>
+    </header>
+
+    <div class="layout">
+      <aside class="panel">
+        <nav>
+          <ul>
+            <li><a href="#endpoints">Endpoints</a></li>
+            <li><a href="#examples">Examples</a></li>
+            <li><a href="#responses">Responses</a></li>
+            <li><a href="#ops">Operational</a></li>
+          </ul>
+        </nav>
+      </aside>
+
+      <main>
+        <section class="panel" id="endpoints">
+          <h2>Endpoints</h2>
+          <p class="muted">간단히: POST <code>/store</code> → 저장(1시간), GET <code>/read/:id</code> → 한 번만 읽기</p>
+          <h3>POST /store</h3>
+          <p>요청: <code>Content-Type: application/json</code>, body: <code>{"message":"..."}</code></p>
+          <pre id="post-example">curl -i -X POST https://api.kalpha.kr/store \
+  -H "Content-Type: application/json" \
+  -d '{"message":"내 비밀번호는 1234"}'</pre>
+          <button class="copy" onclick="navigator.clipboard.writeText(document.getElementById('post-example').innerText)">복사</button>
+
+          <h3>GET /read/:id</h3>
+          <p>발급된 ID로 한 번만 조회, 조회 즉시 삭제</p>
+          <pre id="get-example">curl -i https://api.kalpha.kr/read/&lt;UUID&gt;</pre>
+          <button class="copy" onclick="navigator.clipboard.writeText(document.getElementById('get-example').innerText)">복사</button>
+        </section>
+
+        <section class="panel" id="examples">
+          <h2>Examples</h2>
+          <pre id="js-example">const res = await fetch('https://api.kalpha.kr/store', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:'비밀'})});const j=await res.json();console.log(j);</pre>
+          <button class="copy" onclick="navigator.clipboard.writeText(document.getElementById('js-example').innerText)">복사</button>
+          <h4>Local</h4>
+          <pre id="local-example">curl -i -X POST http://127.0.0.1:8787/store -H "Content-Type: application/json" -d '{"message":"test"}'</pre>
+          <button class="copy" onclick="navigator.clipboard.writeText(document.getElementById('local-example').innerText)">복사</button>
+        </section>
+
+        <section class="panel" id="responses">
+          <h2>Responses</h2>
+          <pre>// POST /store (201)
+{"id":"...","ttl_seconds":3600}
+
+// GET /read/:id (200)
+{"message":"..."}
+
+// Errors
+{"error":"missing message"}
+{"error":"not found or already read"}</pre>
+        </section>
+
+        <section class="panel" id="ops">
+          <h2>Operational notes</h2>
+          <ul>
+            <li>운영환경에서는 인증(Bearer token 등)을 권장합니다.</li>
+            <li>원자성이 필요하면 Durable Object 고려.</li>
+            <li>레이트리밋/길이 제한 적용 권장.</li>
+          </ul>
+        </section>
+      </main>
+    </div>
+
+    <footer>문의/개선 요청: repository 관리자에게 연락하세요.</footer>
+  </div>
+</body>
+</html>`;
+const DOCS_CSS = `:root{--bg:#0f172a;--card:#0b1220;--muted:#94a3b8;--accent:#06b6d4;--white:#ecfeff}
+body{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;margin:0;background:linear-gradient(180deg,#071029 0%, #021120 100%);color:var(--white)}
+.wrap{max-width:1100px;margin:36px auto;padding:28px}
+.header{display:flex;align-items:center;justify-content:space-between;gap:16px}
+.logo{display:flex;align-items:center;gap:12px}
+.logo .mark{width:44px;height:44px;background:linear-gradient(135deg,#06b6d4,#60a5fa);border-radius:8px;display:inline-block}
+h1{margin:0;font-size:20px}
+.subtitle{color:var(--muted);font-size:13px;margin-top:6px}
+.layout{display:grid;grid-template-columns:270px 1fr;gap:20px;margin-top:22px}
+.panel{background:rgba(255,255,255,0.04);padding:18px;border-radius:12px}
+nav ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px}
+nav a{color:var(--white);text-decoration:none;padding:8px 10px;border-radius:8px;display:block}
+pre{background:#001018;padding:14px;border-radius:8px;color:#cfeefb;overflow:auto;font-size:13px}
+.muted{color:var(--muted)}
+.copy{display:inline-block;margin-left:8px;padding:6px 10px;background:#064e64;color:#e6fffb;border-radius:8px;cursor:pointer;font-size:13px}
+.badge{display:inline-block;background:#052f3a;padding:6px 8px;border-radius:8px;color:#a5f3fc;font-size:12px}
+footer{margin-top:18px;color:var(--muted);font-size:13px}
+@media (max-width:880px){.layout{grid-template-columns:1fr}.logo .mark{display:none}}`;
 
 export default {
   async fetch(request: Request, env: Env) {
@@ -65,6 +163,11 @@ export default {
     // 문서 페이지: /docs
     if (request.method === 'GET' && pathname === '/docs') {
       return new Response(DOCS_HTML, { status: 200, headers: { 'content-type': 'text/html; charset=utf-8', ...defaultCorsHeaders } });
+    }
+
+    // CSS static serve
+    if (request.method === 'GET' && pathname === '/styles.css') {
+      return new Response(DOCS_CSS, { status: 200, headers: { 'content-type': 'text/css; charset=utf-8', ...defaultCorsHeaders } });
     }
 
     // 루트 접근 시 바로 문서 페이지 반환 (메인으로 사용)
