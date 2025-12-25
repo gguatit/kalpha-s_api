@@ -96,7 +96,7 @@ body{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;margin:0;mi
 h1{margin:0;font-size:20px}
 .subtitle{color:var(--muted);font-size:13px;margin-top:6px}
 .layout{display:grid;grid-template-columns:270px 1fr;gap:20px;margin-top:22px}
-.panel{background:rgba(255,255,255,0.04);padding:18px;border-radius:12px}
+.panel{background:rgba(255,255,255,0.04);padding:18px;border-radius:12px;margin:16px 0}
 nav ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px}
 nav a{color:var(--white);text-decoration:none;padding:8px 10px;border-radius:8px;display:block}
 pre{background:#001018;padding:14px;border-radius:8px;color:#cfeefb;overflow:auto;font-size:13px;white-space:pre-wrap;word-break:break-word}
