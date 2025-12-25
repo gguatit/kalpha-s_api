@@ -1,0 +1,14 @@
+{
+  "name": "kalpha-deaddrop",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "wrangler build",
+    "deploy": "wrangler publish"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.202",
+    "typescript": "^5.0.0",
+    "wrangler": "^3.0.0"
+  }
+}
