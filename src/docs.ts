@@ -30,7 +30,7 @@ export const DOCS_HTML = `<!doctype html>
     <h2>요약</h2>
     <ul>
       <li>저장 TTL: <strong>3600초(1시간)</strong></li>
-      <li>데이터 저장소: Workers KV (`DEAD_DROP` 네임스페이스)</li>
+      <li>데이터 저장소: Workers KV (<code>DEAD_DROP</code> 네임스페이스)</li>
       <li>주요 엔드포인트: <code>POST /store</code>, <code>GET /read/:id</code></li>
     </ul>
   </section>
