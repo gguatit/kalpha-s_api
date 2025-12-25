@@ -87,8 +87,9 @@ const DOCS_CSS = `:root{--bg:#0f172a;--card:#0b1220;--muted:#94a3b8;--accent:#06
 *{box-sizing:border-box}
 html,body{height:100%}
 .body-fix-note{}
-body{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;margin:0;min-height:100vh;display:flex;align-items:flex-start;justify-content:center;padding:36px 12px;background:linear-gradient(180deg,#071029 0%, #021120 100%);color:var(--white);overflow-x:hidden;overflow-y:auto}
 .wrap{width:100%;max-width:1100px;margin:0 auto;padding:28px}
+/* body background fixed to avoid color banding at the bottom when scrolling */
+body{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;margin:0;min-height:100vh;display:flex;align-items:flex-start;justify-content:center;padding:36px 12px 24px;background-color:var(--bg);background:linear-gradient(180deg,#071029 0%, #021120 100%);background-attachment:fixed;color:var(--white);overflow-x:hidden;overflow-y:auto}
 .header{display:flex;align-items:center;justify-content:space-between;gap:16px}
 .logo{display:flex;align-items:center;gap:12px}
 .logo .mark{width:44px;height:44px;background:linear-gradient(135deg,#06b6d4,#60a5fa);border-radius:8px;display:inline-block}
