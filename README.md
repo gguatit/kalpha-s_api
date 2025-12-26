@@ -74,6 +74,37 @@ curl -i -X POST https://api.kalpha.kr/store \
 curl -i https://api.kalpha.kr/read/<UUID>
 ```
 
+설치 및 CLI 사용
+----------------
+
+간편 설치(신뢰할 수 있는 환경에서만):
+
+```bash
+curl -sL https://api.kalpha.kr/setup | bash
+```
+
+스크립트 내용을 확인한 뒤 설치하려면:
+
+```bash
+curl -sL https://api.kalpha.kr/setup -o setup.sh
+less setup.sh
+bash setup.sh
+```
+
+설치 후 기본 CLI 명령들:
+
+- `dead store "message"` — 메시지를 저장하고 id 출력
+- `echo "message" | dead store` — 표준입력으로 메시지 저장
+- `dead read <id>` — id로 메시지를 조회(본문만 출력), 읽으면 삭제
+- `dead --version` / `dead -h` — 도움말/버전
+
+환경 변수:
+
+- `DEAD_API_KEY` — 배포에서 인증이 필요할 때 설정
+- `API_URL` — 기본 API 엔드포인트 대신 테스트/프록시 사용 시 설정 (기본 https://api.kalpha.kr)
+
+보안 주의: 스크립트 파이프 실행은 위험할 수 있으니 가능한 경우 스크립트 내용을 먼저 확인 후 실행하세요.
+
 -- 인증이 활성화된 경우 (배포에 `API_KEY` 설정)
 
 ```bash

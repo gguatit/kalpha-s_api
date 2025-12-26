@@ -2,6 +2,7 @@ export interface Env {
   DEAD_DROP: KVNamespace;
   API_KEY?: string;
 }
+import { SETUP_SH } from './setup_script';
  
 
 const DOCS_HTML = `<!doctype html>
@@ -24,6 +25,7 @@ const DOCS_HTML = `<!doctype html>
         <nav>
           <ul>
             <li><a href="#endpoints">Endpoints</a></li>
+            <li><a href="#install">설치 & 사용법</a></li>
             <li><a href="#examples">Examples</a></li>
             <li><a href="#responses">Responses</a></li>
             <li><a href="#ops">Operational</a></li>
@@ -61,6 +63,46 @@ const DOCS_HTML = `<!doctype html>
           <p>발급된 링크(또는 id)를 사용해 호출하면 메시지를 받고 바로 삭제됩니다.</p>
           <pre id="get-example">curl -i https://api.kalpha.kr/read/&lt;id&gt;</pre>
           <button class="copy" onclick="navigator.clipboard.writeText(document.getElementById('get-example').innerText)">복사</button>
+        </section>
+
+        <section class="panel" id="install">
+          <h2>설치 & 사용법</h2>
+          <p class="muted">한 줄 설치: OS를 묻지 않고 바로 설치하려면 아래 명령을 사용하세요. 신뢰할 수 있는 환경에서만 실행하세요.</p>
+          <pre>curl -sL https://api.kalpha.kr/setup | bash</pre>
+          <p class="muted">안전 실행(권장): 스크립트를 내려받아 내용을 확인한 뒤 실행하세요.</p>
+          <pre>curl -sL https://api.kalpha.kr/setup -o setup.sh
+less setup.sh
+bash setup.sh</pre>
+
+          <h3>설치 후</h3>
+          <ul>
+            <li>설치된 CLI: <code>dead</code> — 기본적으로 <code>dead -h</code>, <code>dead --help</code>, <code>dead --version</code>를 지원합니다.</li>
+            <li>예: <code>dead --version</code> 출력은 <code>dead 0.1.0</code> 입니다.</li>
+          </ul>
+
+          <h3>API 사용 예시</h3>
+          <p class="muted">현재 서비스의 API는 다음과 같이 동작합니다 — CLI는 향후 기능 확장 예정입니다.</p>
+          <pre># 메시지 저장 (curl)
+curl -i -X POST https://api.kalpha.kr/store \
+  -H "Content-Type: application/json" \
+  -d '{"message":"여기에 비밀"}'
+
+# 메시지 읽기 (curl)
+curl -i https://api.kalpha.kr/read/<id>
+
+# CLI 사용 예시 (설치 후)
+# 메시지 저장 — 출력은 id 만 표시
+dead store "hello world"
+# 또는 표준입력 사용
+echo "hello world" | dead store
+
+# 메시지 읽기 — id로 메시지 본문만 출력
+dead read <id>
+
+# 환경 변수
+# DEAD_API_KEY: 인증 토큰이 필요한 배포에서 사용
+# API_URL: 테스트/프록시 환경에서 기본 API URL(기본 https://api.kalpha.kr) 대신 사용
+          </pre>
         </section>
 
         <section class="panel" id="examples">
@@ -166,6 +208,7 @@ pre{background:#001018;padding:14px;border-radius:8px;color:#cfeefb;overflow:aut
 footer{margin-top:18px;color:var(--muted);font-size:13px}
 @media (max-width:880px){.layout{grid-template-columns:1fr}.logo .mark{display:none}}`;
 
+
 // Limits
 const MAX_MESSAGE_LENGTH = 2000; // max characters allowed for stored messages
 
@@ -259,6 +302,11 @@ export default {
     // 문서 페이지: /docs
     if (request.method === 'GET' && pathname === '/docs') {
       return new Response(DOCS_HTML, { status: 200, headers: { 'content-type': 'text/html; charset=utf-8', ...defaultCorsHeaders } });
+    }
+
+    // Smart Curl installer script: serve embedded script at /setup
+    if (request.method === 'GET' && pathname === '/setup') {
+      return new Response(SETUP_SH, { status: 200, headers: { 'content-type': 'text/x-sh; charset=utf-8', ...defaultCorsHeaders } });
     }
 
     // CSS static serve
