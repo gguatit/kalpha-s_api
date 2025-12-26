@@ -11,7 +11,7 @@ if [ "$UNAME" = "Darwin" ]; then
 elif [ "$UNAME" = "Linux" ]; then
   if [ -f /etc/os-release ]; then
     . /etc/os-release
-    ID_LOWER=$(echo "${ID:-}" | tr '[:upper:]' '[:lower:]')
+    ID_LOWER=$(echo "\${ID:-}" | tr '[:upper:]' '[:lower:]')
     case "$ID_LOWER" in
       ubuntu|debian) OS="debian" ;;
       arch) OS="arch" ;;
@@ -31,8 +31,8 @@ echo "Detected OS: $OS"
 DEST_DIR=""
 if [ -w "/usr/local/bin" ]; then
   DEST_DIR="/usr/local/bin"
-elif [ -n "${XDG_BIN_HOME-}" ]; then
-  DEST_DIR="$XDG_BIN_HOME"
+elif [ -n "\${XDG_BIN_HOME-}" ]; then
+  DEST_DIR="\${XDG_BIN_HOME}"
 else
   mkdir -p "$HOME/.local/bin"
   DEST_DIR="$HOME/.local/bin"
@@ -47,11 +47,11 @@ cat > "$TMPFILE" <<'EOF'
 #!/usr/bin/env bash
 set -euo pipefail
 
-API_URL=${API_URL:-https://api.kalpha.kr}
+API_URL=\${API_URL:-https://api.kalpha.kr}
 # API key can be passed via DEAD_API_KEY env var or DEAD_API_KEY file
 AUTH_HEADER=""
-if [ -n "${DEAD_API_KEY-}" ]; then
-  AUTH_HEADER="-H 'Authorization: Bearer ${DEAD_API_KEY}'"
+if [ -n "\${DEAD_API_KEY-}" ]; then
+  AUTH_HEADER="-H 'Authorization: Bearer \${DEAD_API_KEY}'"
 fi
 
 usage(){
@@ -94,8 +94,8 @@ case "$cmd" in
     fi
     # send as plain text so server will treat body as message
     # post and extract id from json response (try jq -> python3 -> sed)
-    if [ -n "${DEAD_API_KEY-}" ]; then
-      RESP=$(curl -sS -X POST "$API_URL/store" -H "Content-Type: text/plain" -H "Authorization: Bearer ${DEAD_API_KEY}" --data-binary "$MESSAGE")
+    if [ -n "\${DEAD_API_KEY-}" ]; then
+      RESP=$(curl -sS -X POST "$API_URL/store" -H "Content-Type: text/plain" -H "Authorization: Bearer \${DEAD_API_KEY}" --data-binary "$MESSAGE")
     else
       RESP=$(curl -sS -X POST "$API_URL/store" -H "Content-Type: text/plain" --data-binary "$MESSAGE")
     fi
@@ -116,8 +116,8 @@ case "$cmd" in
     ID="$1"
     if [ -z "$ID" ]; then echo "Usage: dead read <id>" >&2; exit 2; fi
     # fetch and print only the message field
-    if [ -n "${DEAD_API_KEY-}" ]; then
-      RESP=$(curl -sS "$API_URL/read/$ID" -H "Authorization: Bearer ${DEAD_API_KEY}")
+    if [ -n "\${DEAD_API_KEY-}" ]; then
+      RESP=$(curl -sS "$API_URL/read/$ID" -H "Authorization: Bearer \${DEAD_API_KEY}")
     else
       RESP=$(curl -sS "$API_URL/read/$ID")
     fi
