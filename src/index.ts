@@ -2,7 +2,7 @@ export interface Env {
   DEAD_DROP: KVNamespace;
   API_KEY?: string;
 }
-import { SETUP_SH } from './setup_script';
+import { SETUP_SH } from './cli/setup_script';
  
 
 const DOCS_HTML = `<!doctype html>
