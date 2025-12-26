@@ -6,18 +6,3 @@
     "build": "echo \"no build required\""
   }
 }
-{
-  "name": "kalpha-deaddrop",
-  "version": "0.1.0",
-  "private": true,
-  "scripts": {
-    "build": "wrangler build",
-    "dev": "wrangler dev",
-    "deploy": "wrangler publish"
-  {
-    "name": "kalpha-s_api-removed",
-    "version": "0.0.0",
-    "private": true,
-    "description": "REMOVED: file content replaced per user request."
-  }
-}
