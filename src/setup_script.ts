@@ -105,7 +105,7 @@ case "$cmd" in
       elif command -v python3 >/dev/null 2>&1; then
         echo "$RESP" | python3 -c "import sys,json;print(json.load(sys.stdin).get('id',''))"
       else
-        echo "$RESP" | sed -n 's/.*"id"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p'
+          echo "$RESP" | sed -n 's/.*"id"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\\1/p'
       fi
     }
     ID=$(extract_id)
@@ -126,7 +126,7 @@ case "$cmd" in
     elif command -v python3 >/dev/null 2>&1; then
       echo "$RESP" | python3 -c "import sys,json;print(json.load(sys.stdin).get('message',''))"
     else
-      echo "$RESP" | sed -n 's/.*"message"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p'
+        echo "$RESP" | sed -n 's/.*"message"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\\1/p'
     fi
     ;;
   -h|--help|help|"")
