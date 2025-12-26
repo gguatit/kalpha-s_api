@@ -3,6 +3,7 @@ export interface Env {
   API_KEY?: string;
 }
 import { SETUP_SH } from './cli/setup_script';
+import OPENAPI from './openapi';
  
 
 const DOCS_HTML = `<!doctype html>
@@ -307,6 +308,11 @@ export default {
     // Smart Curl installer script: serve embedded script at /setup
     if (request.method === 'GET' && pathname === '/setup') {
       return new Response(SETUP_SH, { status: 200, headers: { 'content-type': 'text/x-sh; charset=utf-8', ...defaultCorsHeaders } });
+    }
+
+    // OpenAPI JSON
+    if (request.method === 'GET' && pathname === '/openapi.json') {
+      return new Response(JSON.stringify(OPENAPI), { status: 200, headers: { 'content-type': 'application/json; charset=utf-8', ...defaultCorsHeaders } });
     }
 
     // CSS static serve
