@@ -11,6 +11,7 @@ export const OPENAPI = {
   tags: [
     { name: 'Dead Drop', description: '한 번만 읽을 수 있는 임시 비밀 메시지 저장소' },
     { name: 'IP Info', description: '요청자의 IP 주소 및 지리 정보 조회' },
+    { name: 'QR Code', description: 'QR 코드 생성 (SVG/JSON, WiFi·vCard·이메일 등 지원)' },
   ],
   components: {
     securitySchemes: {
@@ -155,6 +156,37 @@ export const OPENAPI = {
               },
             },
           },
+        },
+      },
+    },
+    // ── QR Code ──
+    '/qr': {
+      get: {
+        tags: ['QR Code'],
+        summary: 'Generate a QR code',
+        description: 'Generates a QR code as SVG image or JSON matrix. Supports structured data types: WiFi, vCard, email, phone, SMS, geo coordinates.',
+        parameters: [
+          { name: 'data', in: 'query', description: 'Text or URL to encode (required unless using a structured type)', schema: { type: 'string' } },
+          { name: 'type', in: 'query', description: 'Structured data type', schema: { type: 'string', enum: ['text', 'wifi', 'email', 'phone', 'sms', 'geo', 'vcard'] } },
+          { name: 'format', in: 'query', description: 'Output format (default: svg)', schema: { type: 'string', enum: ['svg', 'json'], default: 'svg' } },
+          { name: 'size', in: 'query', description: 'Image size in pixels (50-1000, default: 300)', schema: { type: 'integer', default: 300 } },
+          { name: 'color', in: 'query', description: 'QR code color (default: #000000)', schema: { type: 'string', default: '#000000' } },
+          { name: 'bg', in: 'query', description: 'Background color (default: #ffffff)', schema: { type: 'string', default: '#ffffff' } },
+          { name: 'ecl', in: 'query', description: 'Error correction level', schema: { type: 'string', enum: ['L', 'M', 'Q', 'H'], default: 'M' } },
+          { name: 'margin', in: 'query', description: 'Quiet zone margin in modules (0-10, default: 2)', schema: { type: 'integer', default: 2 } },
+          { name: 'ssid', in: 'query', description: 'WiFi SSID (type=wifi)', schema: { type: 'string' } },
+          { name: 'password', in: 'query', description: 'WiFi password (type=wifi)', schema: { type: 'string' } },
+          { name: 'name', in: 'query', description: 'Contact name (type=vcard)', schema: { type: 'string' } },
+        ],
+        responses: {
+          '200': {
+            description: 'QR code generated',
+            content: {
+              'image/svg+xml': { schema: { type: 'string' } },
+              'application/json': { schema: { type: 'object' } },
+            },
+          },
+          '400': { description: 'Bad Request', content: { 'application/json': { schema: { $ref: '#/components/schemas/ErrorResponse' } } } },
         },
       },
     },

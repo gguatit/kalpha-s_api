@@ -12,6 +12,7 @@
 |-----|------|
 | **Dead Drop** | 한 번만 읽을 수 있는 임시 비밀 메시지 저장소 |
 | **IP Info** | 요청자의 IP 주소 및 지리/네트워크 정보 조회 |
+| **QR Code** | QR 코드 생성 (SVG/JSON, WiFi·vCard·이메일 등 지원) |
 
 ---
 
@@ -105,6 +106,66 @@ curl https://api.kalpha.kr/ip/simple
 |--------|------|------|
 | `GET` | `/ip` | 전체 IP 정보 (JSON) |
 | `GET` | `/ip/simple` | IP 주소만 (텍스트) |
+
+---
+
+## QR Code API
+
+텍스트, URL, WiFi, 연락처 등 다양한 데이터를 QR 코드로 변환합니다. SVG 이미지 또는 JSON 매트릭스로 출력합니다.
+
+### 기본 사용
+
+```bash
+# 텍스트/URL → QR 코드 (SVG 이미지)
+curl "https://api.kalpha.kr/qr?data=https://kalpha.kr" -o qr.svg
+
+# 색상/크기 커스터마이즈
+curl "https://api.kalpha.kr/qr?data=hello&color=%231e40af&bg=%23f0f9ff&size=500" -o qr.svg
+
+# JSON 매트릭스 출력
+curl "https://api.kalpha.kr/qr?data=hello&format=json"
+```
+
+### 구조화된 데이터 타입
+
+```bash
+# WiFi QR 코드 (스마트폰으로 스캔하면 자동 연결)
+curl "https://api.kalpha.kr/qr?type=wifi&ssid=MyWiFi&password=1234&encryption=WPA" -o wifi.svg
+
+# 연락처 (vCard)
+curl "https://api.kalpha.kr/qr?type=vcard&name=Hong Gildong&phone=010-1234-5678&email=hong@example.com" -o contact.svg
+
+# 이메일
+curl "https://api.kalpha.kr/qr?type=email&to=dev@kalpha.kr&subject=Hello" -o email.svg
+
+# 전화
+curl "https://api.kalpha.kr/qr?type=phone&number=010-1234-5678" -o phone.svg
+
+# SMS
+curl "https://api.kalpha.kr/qr?type=sms&number=010-1234-5678&message=안녕하세요" -o sms.svg
+
+# 위치 (위도/경도)
+curl "https://api.kalpha.kr/qr?type=geo&lat=37.5660&lng=126.9784" -o location.svg
+```
+
+### 옵션
+
+| 파라미터 | 기본값 | 설명 |
+|-----------|--------|------|
+| `data` | - | 인코딩할 텍스트 또는 URL |
+| `type` | `text` | 데이터 타입 (text, wifi, email, phone, sms, geo, vcard) |
+| `format` | `svg` | 출력 형식 (svg, json) |
+| `size` | `300` | 이미지 크기 (50-1000px) |
+| `color` | `#000000` | QR 코드 색상 |
+| `bg` | `#ffffff` | 배경 색상 |
+| `ecl` | `M` | 오류 정정 레벨 (L, M, Q, H) |
+| `margin` | `2` | 여백 (0-10) |
+
+### 엔드포인트 요약
+
+| 메서드 | 경로 | 설명 |
+|--------|------|------|
+| `GET` | `/qr` | QR 코드 생성 (SVG 또는 JSON) |
 
 ---
 

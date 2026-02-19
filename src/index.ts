@@ -4,6 +4,7 @@ import { DOCS_HTML } from './docs';
 import { requireAuth } from './auth';
 import { checkRateLimit } from './ratelimit';
 import { handleIpFull, handleIpSimple } from './handlers/ip';
+import { handleQr } from './handlers/qr';
 import { MAX_MESSAGE_LENGTH, UUID_REGEX, CORS_HEADERS, jsonResponse } from './helpers';
 
 export type { Env };
@@ -95,6 +96,13 @@ export default {
     // GET /ip/simple — IP 주소만 (텍스트)
     if (request.method === 'GET' && pathname === '/ip/simple') {
       return handleIpSimple(request);
+    }
+
+    // ─── QR Code API ─────────────────────────────
+
+    // GET /qr — QR 코드 생성 (SVG 또는 JSON)
+    if (request.method === 'GET' && pathname === '/qr') {
+      return handleQr(request);
     }
 
     // ─── Docs ────────────────────────────────────
