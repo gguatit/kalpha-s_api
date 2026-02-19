@@ -14,14 +14,22 @@ interface CfProperties {
     continent?: string;
     httpProtocol?: string;
     tlsVersion?: string;
+    clientIp?: string;
+}
+
+/** 요청에서 클라이언트 IP 주소를 추출 */
+function getClientIp(request: Request, cf?: CfProperties): string {
+    return request.headers.get('cf-connecting-ip')
+        || request.headers.get('x-real-ip')
+        || request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
+        || cf?.clientIp
+        || 'unknown';
 }
 
 /** GET /ip — 요청자의 전체 IP 정보를 JSON으로 반환 */
 export function handleIpFull(request: Request): Response {
     const cf = (request as any).cf as CfProperties | undefined;
-    const ip = request.headers.get('cf-connecting-ip')
-        || request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
-        || 'unknown';
+    const ip = getClientIp(request, cf);
 
     return jsonResponse({
         ip,
@@ -44,9 +52,8 @@ export function handleIpFull(request: Request): Response {
 
 /** GET /ip/simple — IP 주소만 텍스트로 반환 (curl 친화적) */
 export function handleIpSimple(request: Request): Response {
-    const ip = request.headers.get('cf-connecting-ip')
-        || request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
-        || 'unknown';
+    const cf = (request as any).cf as CfProperties | undefined;
+    const ip = getClientIp(request, cf);
 
     return new Response(ip + '\n', {
         status: 200,
