@@ -14,7 +14,7 @@ export const OPENAPI = {
    */
   components: {
     securitySchemes: {
-      bearerAuth: { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' }
+      bearerAuth: { type: 'http', scheme: 'bearer', bearerFormat: 'opaque' }
     },
     schemas: {
       StoreRequest: { type: 'object', properties: { message: { type: 'string' } }, required: ['message'] },
