@@ -3,6 +3,7 @@ import OPENAPI from './openapi';
 import { DOCS_HTML } from './docs';
 import { requireAuth } from './auth';
 import { checkRateLimit } from './ratelimit';
+import { handleIpFull, handleIpSimple } from './handlers/ip';
 import { MAX_MESSAGE_LENGTH, UUID_REGEX, CORS_HEADERS, jsonResponse } from './helpers';
 
 export type { Env };
@@ -24,6 +25,8 @@ export default {
     // Rate Limiting
     const rateLimited = await checkRateLimit(request, env);
     if (rateLimited) return rateLimited;
+
+    // ─── Dead Drop API ───────────────────────────
 
     // POST /store — 메시지 저장
     if (request.method === 'POST' && pathname === '/store') {
@@ -81,6 +84,20 @@ export default {
         return jsonResponse({ error: 'internal error' }, 500);
       }
     }
+
+    // ─── IP Info API ─────────────────────────────
+
+    // GET /ip — 전체 IP 정보 (JSON)
+    if (request.method === 'GET' && pathname === '/ip') {
+      return handleIpFull(request);
+    }
+
+    // GET /ip/simple — IP 주소만 (텍스트)
+    if (request.method === 'GET' && pathname === '/ip/simple') {
+      return handleIpSimple(request);
+    }
+
+    // ─── Docs ────────────────────────────────────
 
     // GET /openapi.json
     if (request.method === 'GET' && pathname === '/openapi.json') {

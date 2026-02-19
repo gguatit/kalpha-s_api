@@ -4,7 +4,7 @@ export const DOCS_HTML = `<!doctype html>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Dead Drop API — Docs</title>
+    <title>Kalpha's API — Docs</title>
     <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@4.15.5/swagger-ui.css" />
     <style>
       body { margin: 0; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; }
@@ -16,7 +16,7 @@ export const DOCS_HTML = `<!doctype html>
   </head>
   <body>
     <header>
-      <h1>Dead Drop API</h1>
+      <h1>Kalpha's API</h1>
     </header>
     <div class="note">이 문서는 서버에서 제공하는 <strong>/openapi.json</strong>을 사용합니다. 인증(Bearer)을 사용하는 배포에서는 상단 Authorize 버튼을 사용하세요.</div>
     <div id="swagger-ui"></div>
