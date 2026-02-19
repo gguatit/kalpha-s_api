@@ -12,3 +12,15 @@ kv_namespaces = [
 kv_namespaces = [
   { binding = "DEAD_DROP", id = "35daf343d0244b989e423bf1bc0baf5e", preview_id = "local-dev-preview" }
 ]
+
+# ── Observability (로그 영구 저장) ──
+[observability]
+enabled = false
+head_sampling_rate = 1
+
+[observability.logs]
+enabled = true
+head_sampling_rate = 1
+persist = true
+invocation_logs = true
+
