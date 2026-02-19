@@ -3,7 +3,7 @@ export const OPENAPI = {
   info: {
     title: "Kalpha's API",
     version: '0.3.0',
-    description: "Kalpha's API — 실용적인 공개 API 모음. Dead Drop(일회성 비밀 메시지) 및 IP 정보 조회 등을 제공합니다.",
+    description: "Kalpha's API — 실용적인 공개 API 모음. Dead Drop(일회성 비밀 메시지) 및 IP 정보 조회 등을 제공합니다.\n\n📋 이용 안내: 본 API를 서비스에 사용하시려면 dev@kalpha.kr로 서비스명과 사용 방식을 알려주세요.",
   },
   servers: [
     { url: 'https://api.kalpha.kr', description: 'Production' },
