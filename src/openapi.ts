@@ -3,7 +3,7 @@ export const OPENAPI = {
   info: {
     title: 'Dead Drop API',
     version: '0.2.0',
-    description: '한 번만 읽을 수 있는 임시 비밀 메시지 저장소 API. 이 OpenAPI 문서는 디자인/운영 세부사항과 CLI 스펙을 포함하는 확장된 사양입니다.'
+    description: '한 번만 읽을 수 있는 임시 비밀 메시지 저장소 API.'
   },
   servers: [
     { url: 'https://api.kalpha.kr', description: 'Production' }
@@ -71,15 +71,8 @@ export const OPENAPI = {
         security: [{ bearerAuth: [] }]
       }
     },
-    '/setup': {
-      get: {
-        summary: 'Download installer script',
-        description: 'Returns the shell installer used by `curl -sL /setup | bash`.',
-        responses: { '200': { description: 'Shell script', content: { 'text/x-sh': { schema: { type: 'string' } } } } }
-      }
-    }
   },
-  // x- 확장 필드: 디자인·운영·CLI 스펙을 포함
+  // x- 확장 필드: 디자인·운영 정보
   'x-design': {
     ui: {
       docsPage: '/docs',
@@ -90,30 +83,6 @@ export const OPENAPI = {
       maxMessageLength: 2000,
       rateLimit: { requestsPerMinute: 60 }
     }
-  },
-  'x-cli': {
-    name: 'dead',
-    install: {
-      oneLiner: 'curl -sL https://api.kalpha.kr/setup | bash',
-      safeInstall: 'curl -sL https://api.kalpha.kr/setup -o setup.sh && less setup.sh && bash setup.sh'
-    },
-    commands: {
-      store: {
-        summary: 'Store message',
-        usage: 'dead store "message"  # or echo "msg" | dead store',
-        output: 'id only (plain)',
-        examples: [ 'dead store "hello world"', 'echo "secret" | dead store' ]
-      },
-      read: {
-        summary: 'Read message by id',
-        usage: 'dead read <id>',
-        output: 'message body only (plain)',
-        examples: [ 'dead read abc-123' ]
-      },
-      help: { summary: 'Show help', usage: 'dead -h | dead --help' },
-      version: { summary: 'Show version', usage: 'dead --version', value: '0.1.0' }
-    },
-    env: { DEAD_API_KEY: 'optional bearer token for protected deployments', API_URL: 'override API base URL' }
   }
 };
 

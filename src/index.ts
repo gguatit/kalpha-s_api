@@ -3,7 +3,6 @@ export interface Env {
   API_KEY?: string;
 }
 
-import { SETUP_SH } from './cli/setup_script';
 import OPENAPI from './openapi';
 
 const MAX_MESSAGE_LENGTH = 2000; // max characters allowed for stored messages
@@ -19,7 +18,6 @@ const DOCS_HTML = `<!doctype html>
       body { margin: 0; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; }
       header { background: #0b1220; color: #ecfeff; padding: 18px 24px; display:flex;align-items:center;justify-content:space-between }
       header h1 { margin:0; font-size:18px }
-      header .install { font-size:13px; opacity:0.85 }
       #swagger-ui { margin: 0; }
       .note { padding: 8px 24px; background:#f8fafc; color:#0b1220; font-size:13px }
     </style>
@@ -27,7 +25,6 @@ const DOCS_HTML = `<!doctype html>
   <body>
     <header>
       <h1>Dead Drop API</h1>
-      <div class="install">Install: <code>curl -sL https://api.kalpha.kr/setup | bash</code></div>
     </header>
     <div class="note">이 문서는 서버에서 제공하는 <strong>/openapi.json</strong>을 사용합니다. 인증(Bearer)을 사용하는 배포에서는 상단 Authorize 버튼을 사용하세요.</div>
     <div id="swagger-ui"></div>
@@ -128,10 +125,6 @@ export default {
       return jsonResponse({ message }, 200);
     }
 
-    // Serve installer script
-    if (request.method === 'GET' && pathname === '/setup') {
-      return new Response(SETUP_SH, { status: 200, headers: { 'content-type': 'text/x-sh; charset=utf-8', ...defaultCorsHeaders } });
-    }
 
     // Serve OpenAPI JSON
     if (request.method === 'GET' && pathname === '/openapi.json') {

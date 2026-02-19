@@ -7,13 +7,8 @@
 - OpenAPI 사양(`src/openapi.ts`)을 제공하며 `/docs`(Swagger UI)를 통해 문서를 확인할 수 있습니다.
 
 빠른 시작
-1. 설치 스크립트(서버 제공)를 이용한 설치 예:
 
-```bash
-curl -sL https://api.kalpha.kr/setup | bash
-```
-
-2. 메시지 저장 예:
+1. 메시지 저장 예:
 
 ```bash
 # JSON 바디로 저장
@@ -23,7 +18,7 @@ curl -X POST https://api.kalpha.kr/store -H "Content-Type: application/json" -d 
 echo "secret" | curl -X POST https://api.kalpha.kr/store -H "Content-Type: text/plain" --data-binary @-
 ```
 
-3. 메시지 읽기 예:
+2. 메시지 읽기 예:
 
 ```bash
 curl https://api.kalpha.kr/read/<id>
@@ -34,20 +29,13 @@ curl https://api.kalpha.kr/read/<id>
 - `GET /read/{id}` : 저장한 메시지 읽기 및 즉시 삭제 (single-use).
 - `GET /openapi.json` : OpenAPI JSON 사양 제공.
 - `GET /docs` 또는 `/` : Swagger UI 기반 문서 페이지 제공.
-- `GET /setup` : 설치용 쉘 스크립트 반환.
 
 인증
 - 배포 환경에서 `API_KEY`를 설정하면 `POST /store` 및 `GET /read/{id}` 요청에 Bearer 토큰 인증을 요구할 수 있습니다.
 
 개발자 안내
 - 코드 진입점: `src/index.ts`
-- OpenAPI 구성: `src/openapi.ts` (문서화 및 CLI 스펙 포함)
-- 정적 설치 안내 페이지: `static/setup.html`
-
-변경 사항 요약
-- 프로젝트 내 출력·문서 텍스트를 한국어로 정리하는 작업을 수행했습니다.
-  - `src/openapi.ts` 내부 설명은 한국어로 작성되어 있습니다.
-  - (선택적) `src/index.ts`의 Docs HTML 일부 문구를 한국어로 변경할 수 있습니다.
+- OpenAPI 구성: `src/openapi.ts`
 
 기여 및 문의
 - 버그 리포트나 개선 제안은 이 저장소의 이슈로 보내주세요.
