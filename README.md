@@ -6,6 +6,97 @@
 
 ---
 
+## 아키텍처
+
+```mermaid
+graph TB
+    subgraph "Client Layer"
+        A[Browser / cURL]
+    end
+
+    subgraph "Cloudflare Edge"
+        B[Cloudflare Worker<br/>Entry Point]
+        C[CORS Preflight]
+        D[Bearer Auth]
+        E[Rate Limiter<br/>IP 기반 60req/60s]
+    end
+
+    subgraph "API Handlers"
+        F[Dead Drop<br/>Store / Read]
+        G[IP Info<br/>Full / Simple]
+        H[QR Code<br/>SVG / JSON]
+        I[Docs<br/>Swagger UI / OpenAPI]
+    end
+
+    subgraph "Storage"
+        J[Cloudflare KV<br/>DEAD_DROP Namespace]
+    end
+
+    A -->|HTTPS| B
+    B --> C
+    C --> D
+    D --> E
+    E --> F
+    E --> G
+    E --> H
+    E --> I
+    F -->|put / get / delete| J
+    E -.->|Rate Limit Counter| J
+```
+
+### 요청 처리 흐름
+
+```plaintext
+1. 클라이언트 → HTTPS 요청 → Cloudflare Worker (Entry Point)
+2. CORS Preflight 처리 (OPTIONS → 204 응답)
+3. Bearer 토큰 인증 검사 (/store, /read/{id} 대상, API_KEY 설정 시)
+4. IP 기반 Rate Limiting (KV 카운터, 60초 윈도우, 60회 제한)
+5. 라우팅 → 해당 핸들러로 요청 전달
+   ├── POST /store       → 메시지 저장 (KV, TTL 1시간)
+   ├── GET  /read/{id}   → 메시지 읽기 & 즉시 삭제
+   ├── GET  /ip          → CF 엣지 데이터 기반 IP 정보
+   ├── GET  /ip/simple   → IP 주소만 반환
+   ├── GET  /qr          → QR 코드 생성 (SVG/JSON)
+   ├── GET  /openapi.json → OpenAPI 3.0 스펙
+   └── GET  / 또는 /docs  → Swagger UI
+```
+
+### Dead Drop 보안 흐름
+
+```mermaid
+sequenceDiagram
+    participant C as Client
+    participant W as Worker
+    participant KV as Cloudflare KV
+
+    Note over C,KV: 1. 메시지 저장
+    C->>W: POST /store (message)
+    W->>W: Auth 검사 + Rate Limit 확인
+    W->>W: 메시지 유효성 검증 (빈값, 2000자 제한)
+    W->>W: UUID 생성
+    W->>KV: put(id, message, TTL=3600)
+    KV-->>W: OK
+    W-->>C: 201 { id }
+
+    Note over C,KV: 2. 메시지 읽기 (일회성)
+    C->>W: GET /read/{id}
+    W->>W: Auth 검사 + Rate Limit 확인
+    W->>W: UUID 형식 검증
+    W->>KV: get(id)
+    KV-->>W: message
+    W->>KV: delete(id)
+    KV-->>W: OK
+    W-->>C: 200 { message }
+
+    Note over C,KV: 3. 재조회 시도 (실패)
+    C->>W: GET /read/{id}
+    W->>KV: get(id)
+    KV-->>W: null
+    W-->>C: 404 not found or already read
+```
+
+---
+
 ## 제공 API
 
 | API | 설명 |
@@ -204,7 +295,8 @@ src/
 ├── docs.ts           # Swagger UI HTML 템플릿
 ├── openapi.ts        # OpenAPI 스펙
 └── handlers/
-    └── ip.ts         # IP Info API 핸들러
+    ├── ip.ts         # IP Info API 핸들러
+    └── qr.ts         # QR Code API 핸들러
 ```
 
 ### 로컬 개발
