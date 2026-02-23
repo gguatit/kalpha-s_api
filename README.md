@@ -25,6 +25,7 @@ graph TB
         F[Dead Drop<br/>Store / Read]
         G[IP Info<br/>Full / Simple]
         H[QR Code<br/>SVG / JSON]
+        J2[Encode/Decode<br/>Base64 / URL / Hex 등]
         I[Docs<br/>Swagger UI / OpenAPI]
     end
 
@@ -39,6 +40,7 @@ graph TB
     E --> F
     E --> G
     E --> H
+    E --> J2
     E --> I
     F -->|put / get / delete| J
     E -.->|Rate Limit Counter| J
@@ -57,6 +59,8 @@ graph TB
    ├── GET  /ip          → CF 엣지 데이터 기반 IP 정보
    ├── GET  /ip/simple   → IP 주소만 반환
    ├── GET  /qr          → QR 코드 생성 (SVG/JSON)
+   ├── GET  /encode      → 텍스트 인코딩 (Base64, URL, Hex 등)
+   ├── GET  /decode      → 데이터 디코딩
    ├── GET  /openapi.json → OpenAPI 3.0 스펙
    └── GET  / 또는 /docs  → Swagger UI
 ```
@@ -104,6 +108,7 @@ sequenceDiagram
 | **Dead Drop** | 한 번만 읽을 수 있는 임시 비밀 메시지 저장소 |
 | **IP Info** | 요청자의 IP 주소 및 지리/네트워크 정보 조회 |
 | **QR Code** | QR 코드 생성 (SVG/JSON, WiFi·vCard·이메일 등 지원) |
+| **Encode/Decode** | 다양한 형식의 인코딩/디코딩 (Base64, URL, HTML, Hex 등) |
 
 ---
 
@@ -260,6 +265,70 @@ curl "https://api.kalpha.kr/qr?type=geo&lat=37.5660&lng=126.9784" -o location.sv
 
 ---
 
+## Encode/Decode API
+
+텍스트를 다양한 형식으로 인코딩하거나, 인코딩된 데이터를 디코딩합니다. 외부 API 호출 없이 즉시 처리됩니다.
+
+### 지원 형식
+
+| 형식 | 설명 |
+|------|------|
+| `base64` | 표준 Base64 인코딩 |
+| `base64url` | URL-safe Base64 (`+/` → `-_`, 패딩 제거) |
+| `url` | URL 인코딩 (`encodeURIComponent`) |
+| `html` | HTML 엔티티 (`<` → `&lt;` 등) |
+| `hex` | 16진수 문자열 (`hello` → `68656c6c6f`) |
+| `unicode` | 유니코드 이스케이프 (`\uXXXX`) |
+| `rot13` | ROT13 알파벳 치환 (인코딩 = 디코딩) |
+
+### 인코딩
+
+```bash
+# Base64 인코딩
+curl "https://api.kalpha.kr/encode?text=hello&format=base64"
+
+# URL 인코딩
+curl "https://api.kalpha.kr/encode?text=hello world&format=url"
+
+# HTML 엔티티
+curl "https://api.kalpha.kr/encode?text=<script>alert(1)</script>&format=html"
+
+# Hex 인코딩
+curl "https://api.kalpha.kr/encode?text=hello&format=hex"
+```
+
+**응답:**
+```json
+{ "input": "hello", "format": "base64", "result": "aGVsbG8=" }
+```
+
+### 디코딩
+
+```bash
+# Base64 디코딩
+curl "https://api.kalpha.kr/decode?data=aGVsbG8=&format=base64"
+
+# Hex 디코딩
+curl "https://api.kalpha.kr/decode?data=68656c6c6f&format=hex"
+
+# URL 디코딩
+curl "https://api.kalpha.kr/decode?data=hello%20world&format=url"
+```
+
+**응답:**
+```json
+{ "input": "aGVsbG8=", "format": "base64", "result": "hello" }
+```
+
+### 엔드포인트 요약
+
+| 메서드 | 경로 | 설명 |
+|--------|------|------|
+| `GET` | `/encode` | 텍스트 인코딩 (text, format 파라미터 필수) |
+| `GET` | `/decode` | 데이터 디코딩 (data, format 파라미터 필수) |
+
+---
+
 ## 인증
 
 배포 환경에서 `API_KEY`를 설정하면 `POST /store` 및 `GET /read/{id}` 요청에 Bearer 토큰 인증을 요구할 수 있습니다.
@@ -296,7 +365,8 @@ src/
 ├── openapi.ts        # OpenAPI 스펙
 └── handlers/
     ├── ip.ts         # IP Info API 핸들러
-    └── qr.ts         # QR Code API 핸들러
+    ├── qr.ts         # QR Code API 핸들러
+    └── encode.ts     # Encode/Decode API 핸들러
 ```
 
 ### 로컬 개발

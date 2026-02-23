@@ -5,6 +5,7 @@ import { requireAuth } from './auth';
 import { checkRateLimit } from './ratelimit';
 import { handleIpFull, handleIpSimple } from './handlers/ip';
 import { handleQr } from './handlers/qr';
+import { handleEncode, handleDecode } from './handlers/encode';
 import { MAX_MESSAGE_LENGTH, UUID_REGEX, CORS_HEADERS, jsonResponse } from './helpers';
 
 export type { Env };
@@ -103,6 +104,18 @@ export default {
     // GET /qr — QR 코드 생성 (SVG 또는 JSON)
     if (request.method === 'GET' && pathname === '/qr') {
       return handleQr(request);
+    }
+
+    // ─── Encode/Decode API ─────────────────────────
+
+    // GET /encode — 인코딩
+    if (request.method === 'GET' && pathname === '/encode') {
+      return handleEncode(request);
+    }
+
+    // GET /decode — 디코딩
+    if (request.method === 'GET' && pathname === '/decode') {
+      return handleDecode(request);
     }
 
     // ─── Docs ────────────────────────────────────

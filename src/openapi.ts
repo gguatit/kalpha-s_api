@@ -12,6 +12,7 @@ export const OPENAPI = {
     { name: 'Dead Drop', description: '한 번만 읽을 수 있는 임시 비밀 메시지 저장소' },
     { name: 'IP Info', description: '요청자의 IP 주소 및 지리 정보 조회' },
     { name: 'QR Code', description: 'QR 코드 생성 (SVG/JSON, WiFi·vCard·이메일 등 지원)' },
+    { name: 'Encode/Decode', description: '다양한 형식의 인코딩/디코딩 (Base64, URL, HTML, Hex 등)' },
   ],
   components: {
     securitySchemes: {
@@ -57,6 +58,24 @@ export const OPENAPI = {
           tls: { type: 'string', example: 'TLSv1.3', nullable: true },
           userAgent: { type: 'string', nullable: true },
         },
+      },
+      EncodeResponse: {
+        type: 'object',
+        properties: {
+          input: { type: 'string', example: 'hello' },
+          format: { type: 'string', example: 'base64' },
+          result: { type: 'string', example: 'aGVsbG8=' },
+        },
+        required: ['input', 'format', 'result'],
+      },
+      DecodeResponse: {
+        type: 'object',
+        properties: {
+          input: { type: 'string', example: 'aGVsbG8=' },
+          format: { type: 'string', example: 'base64' },
+          result: { type: 'string', example: 'hello' },
+        },
+        required: ['input', 'format', 'result'],
       },
     },
     'x-implementation': {
@@ -187,6 +206,45 @@ export const OPENAPI = {
             },
           },
           '400': { description: 'Bad Request', content: { 'application/json': { schema: { $ref: '#/components/schemas/ErrorResponse' } } } },
+        },
+      },
+    },
+    // ── Encode/Decode ──
+    '/encode': {
+      get: {
+        tags: ['Encode/Decode'],
+        summary: 'Encode text',
+        description: 'Encodes the given text using the specified format. Supported formats: base64, base64url, url, html, hex, unicode, rot13.',
+        parameters: [
+          { name: 'text', in: 'query', required: true, description: 'Text to encode', schema: { type: 'string' } },
+          { name: 'format', in: 'query', required: true, description: 'Encoding format', schema: { type: 'string', enum: ['base64', 'base64url', 'url', 'html', 'hex', 'unicode', 'rot13'] } },
+        ],
+        responses: {
+          '200': {
+            description: 'Encoded result',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/EncodeResponse' } } },
+          },
+          '400': { description: 'Bad Request', content: { 'application/json': { schema: { $ref: '#/components/schemas/ErrorResponse' } } } },
+          '413': { description: 'Payload Too Large', content: { 'application/json': { schema: { $ref: '#/components/schemas/ErrorResponse' } } } },
+        },
+      },
+    },
+    '/decode': {
+      get: {
+        tags: ['Encode/Decode'],
+        summary: 'Decode data',
+        description: 'Decodes the given data using the specified format. Supported formats: base64, base64url, url, html, hex, unicode, rot13.',
+        parameters: [
+          { name: 'data', in: 'query', required: true, description: 'Data to decode', schema: { type: 'string' } },
+          { name: 'format', in: 'query', required: true, description: 'Decoding format', schema: { type: 'string', enum: ['base64', 'base64url', 'url', 'html', 'hex', 'unicode', 'rot13'] } },
+        ],
+        responses: {
+          '200': {
+            description: 'Decoded result',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/DecodeResponse' } } },
+          },
+          '400': { description: 'Bad Request', content: { 'application/json': { schema: { $ref: '#/components/schemas/ErrorResponse' } } } },
+          '413': { description: 'Payload Too Large', content: { 'application/json': { schema: { $ref: '#/components/schemas/ErrorResponse' } } } },
         },
       },
     },
