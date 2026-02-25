@@ -82,6 +82,8 @@ export const OPENAPI = {
         type: 'object',
         properties: {
           url: { type: 'string', example: 'https://example.com' },
+          pageType: { type: 'string', enum: ['normal', 'bot_protection', 'error'], example: 'normal' },
+          statusCode: { type: 'integer', example: 200 },
           score: { type: 'string', example: 'A+' },
           grade: { type: 'integer', example: 95 },
           headers: {
