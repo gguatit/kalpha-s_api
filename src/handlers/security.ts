@@ -14,8 +14,15 @@ export async function handleSecurityHeaders(request: Request) {
     }
 
     let targetUrl: URL;
+    let rawUrl = urlParam.trim();
+
+    // Add protocol if missing
+    if (!rawUrl.startsWith('http://') && !rawUrl.startsWith('https://')) {
+        rawUrl = 'https://' + rawUrl;
+    }
+
     try {
-        targetUrl = new URL(urlParam);
+        targetUrl = new URL(rawUrl);
         if (!['http:', 'https:'].includes(targetUrl.protocol)) {
             throw new Error('invalid protocol');
         }
