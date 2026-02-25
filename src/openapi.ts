@@ -13,6 +13,7 @@ export const OPENAPI = {
     { name: 'IP Info', description: '요청자의 IP 주소 및 지리 정보 조회' },
     { name: 'QR Code', description: 'QR 코드 생성 (SVG/JSON, WiFi·vCard·이메일 등 지원)' },
     { name: 'Encode/Decode', description: '다양한 형식의 인코딩/디코딩 (Base64, URL, HTML, Hex 등)' },
+    { name: 'Security', description: '보안 관련 유틸리티 (헤더 점검 등)' },
   ],
   components: {
     securitySchemes: {
@@ -76,6 +77,42 @@ export const OPENAPI = {
           result: { type: 'string', example: 'hello' },
         },
         required: ['input', 'format', 'result'],
+      },
+      SecurityHeaderResponse: {
+        type: 'object',
+        properties: {
+          url: { type: 'string', example: 'https://example.com' },
+          score: { type: 'string', example: 'A+' },
+          grade: { type: 'integer', example: 95 },
+          headers: {
+            type: 'object',
+            properties: {
+              'Content-Security-Policy': { type: 'string', nullable: true },
+              'Strict-Transport-Security': { type: 'string', nullable: true },
+              'X-Frame-Options': { type: 'string', nullable: true },
+              'X-Content-Type-Options': { type: 'string', nullable: true },
+              'Referrer-Policy': { type: 'string', nullable: true },
+              'Permissions-Policy': { type: 'string', nullable: true },
+              'Cross-Origin-Embedder-Policy': { type: 'string', nullable: true },
+              'Cross-Origin-Opener-Policy': { type: 'string', nullable: true },
+              'Cross-Origin-Resource-Policy': { type: 'string', nullable: true },
+              'Server': { type: 'string', nullable: true },
+              'X-Powered-By': { type: 'string', nullable: true },
+            },
+          },
+          analysis: {
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                header: { type: 'string' },
+                status: { type: 'string', enum: ['excellent', 'good', 'warning', 'danger', 'info'] },
+                message: { type: 'string' },
+              },
+            },
+          },
+        },
+        required: ['url', 'score', 'grade', 'headers', 'analysis'],
       },
     },
     'x-implementation': {
@@ -245,6 +282,24 @@ export const OPENAPI = {
           },
           '400': { description: 'Bad Request', content: { 'application/json': { schema: { $ref: '#/components/schemas/ErrorResponse' } } } },
           '413': { description: 'Payload Too Large', content: { 'application/json': { schema: { $ref: '#/components/schemas/ErrorResponse' } } } },
+        },
+      },
+    },
+    // ── Security ──
+    '/security/headers': {
+      get: {
+        tags: ['Security'],
+        summary: 'Analyze security headers of a URL',
+        description: 'Fetches the target URL and analyzes various security-related HTTP headers to calculate a safety score.',
+        parameters: [
+          { name: 'url', in: 'query', required: true, description: 'Target URL to analyze (must include http/https)', schema: { type: 'string' } },
+        ],
+        responses: {
+          '200': {
+            description: 'Security analysis result',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/SecurityHeaderResponse' } } },
+          },
+          '400': { description: 'Bad Request', content: { 'application/json': { schema: { $ref: '#/components/schemas/ErrorResponse' } } } },
         },
       },
     },

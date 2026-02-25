@@ -6,6 +6,7 @@ import { checkRateLimit } from './ratelimit';
 import { handleIpFull, handleIpSimple } from './handlers/ip';
 import { handleQr } from './handlers/qr';
 import { handleEncode, handleDecode } from './handlers/encode';
+import { handleSecurityHeaders } from './handlers/security';
 import { MAX_MESSAGE_LENGTH, UUID_REGEX, CORS_HEADERS, jsonResponse } from './helpers';
 
 export type { Env };
@@ -116,6 +117,13 @@ export default {
     // GET /decode — 디코딩
     if (request.method === 'GET' && pathname === '/decode') {
       return handleDecode(request);
+    }
+
+    // ─── Security API ──────────────────────────────
+
+    // GET /security/headers — 보안 헤더 점검
+    if (request.method === 'GET' && pathname === '/security/headers') {
+      return handleSecurityHeaders(request);
     }
 
     // ─── Docs ────────────────────────────────────
