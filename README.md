@@ -26,6 +26,7 @@ graph TB
         G[IP Info<br/>Full / Simple]
         H[QR Code<br/>SVG / JSON]
         J2[Encode/Decode<br/>Base64 / URL / Hex 등]
+        S[Security API<br/>Header Inspector / Beta]
         I[Docs<br/>Swagger UI / OpenAPI]
     end
 
@@ -41,6 +42,7 @@ graph TB
     E --> G
     E --> H
     E --> J2
+    E --> S
     E --> I
     F -->|put / get / delete| J
     E -.->|Rate Limit Counter| J
@@ -109,6 +111,7 @@ sequenceDiagram
 | **IP Info** | 요청자의 IP 주소 및 지리/네트워크 정보 조회 |
 | **QR Code** | QR 코드 생성 (SVG/JSON, WiFi·vCard·이메일 등 지원) |
 | **Encode/Decode** | 다양한 형식의 인코딩/디코딩 (Base64, URL, HTML, Hex 등) |
+| **Security API (Beta)** | HTTP 보안 헤더 분석 및 등급 산출 |
 
 ---
 
@@ -326,6 +329,48 @@ curl "https://api.kalpha.kr/decode?data=hello%20world&format=url"
 |--------|------|------|
 | `GET` | `/encode` | 텍스트 인코딩 (text, format 파라미터 필수) |
 | `GET` | `/decode` | 데이터 디코딩 (data, format 파라미터 필수) |
+| `GET` | `/security/headers` | 보안 헤더 분석 (url 파라미터 필수) |
+
+---
+
+## Security API (Beta)
+
+> 🛠️ **개발 중 알림**: 이 API는 현재 개발 중인 베타 버전이므로, 모든 결과가 완벽하지 않을 수 있습니다.
+
+대상 URL의 HTTP 보안 헤더를 정밀하게 분석하여 보안 점수(A+ ~ F)와 상세 보고서를 제공합니다.
+
+### 특징
+- **스마트 분석**: 페이지 유형(정상, 봇 보호, 에러) 자동 감지
+- **포괄적 검증**: CSP, HSTS, 쿠키 보안, CORS 설정 등 15종 이상의 지표 점검
+- **유연한 스코어링**: API 환경 및 최신 보안 표준을 고려한 가중치 적용
+
+### 사용법
+
+```bash
+curl "https://api.kalpha.kr/security/headers?url=https://example.com"
+```
+
+**응답 예시:**
+```json
+{
+  "url": "https://example.com/",
+  "pageType": "normal",
+  "statusCode": 200,
+  "score": "A+",
+  "grade": 95,
+  "analysis": [
+    { "header": "Content-Security-Policy", "status": "excellent", "message": "CSP가 활성화되어 있습니다." },
+    { "header": "Strict-Transport-Security", "status": "excellent", "message": "HSTS가 설정되어 안전한 HTTPS 연결을 강제합니다." }
+    // ...
+  ]
+}
+```
+
+### 엔드포인트 요약
+
+| 메서드 | 경로 | 설명 |
+|--------|------|------|
+| `GET` | `/security/headers` | 보안 헤더 분석 및 등급 산출 |
 
 ---
 
@@ -366,7 +411,8 @@ src/
 └── handlers/
     ├── ip.ts         # IP Info API 핸들러
     ├── qr.ts         # QR Code API 핸들러
-    └── encode.ts     # Encode/Decode API 핸들러
+    ├── encode.ts     # Encode/Decode API 핸들러
+    └── security.ts   # Security API 핸들러
 ```
 
 ### 로컬 개발
