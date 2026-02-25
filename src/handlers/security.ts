@@ -31,13 +31,14 @@ export async function handleSecurityHeaders(request: Request) {
     }
 
     try {
-        // 1. Fetch with timeout and no-redirect (to see original headers)
+        // 1. Fetch and follow redirects (up to a reasonable limit)
+        // We want to see the final destination's headers for a proper security analysis
         const response = await fetch(targetUrl.toString(), {
             method: 'GET',
             headers: {
                 'User-Agent': "Kalpha's Security Inspector/1.0",
             },
-            redirect: 'manual',
+            redirect: 'follow', // Change to follow redirects
         });
 
         const headers = response.headers;
@@ -99,7 +100,7 @@ export async function handleSecurityHeaders(request: Request) {
         else if (score >= 40) grade = 'D';
 
         const result = {
-            url: targetUrl.toString(),
+            url: response.url || targetUrl.toString(),
             score: grade,
             grade: score,
             headers: Object.fromEntries(headers.entries()),

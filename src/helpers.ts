@@ -11,6 +11,6 @@ export const CORS_HEADERS: Record<string, string> = {
 export function jsonResponse(obj: unknown, status = 200): Response {
     return new Response(JSON.stringify(obj), {
         status,
-        headers: { 'content-type': 'application/json', ...CORS_HEADERS },
+        headers: { 'content-type': 'application/json; charset=utf-8', ...CORS_HEADERS },
     });
 }
