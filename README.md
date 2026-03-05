@@ -27,6 +27,7 @@ graph TB
         H[QR Code<br/>SVG / JSON]
         J2[Encode/Decode<br/>Base64 / URL / Hex 등]
         S[Security API<br/>Header Inspector / Beta]
+        M[EdgeForge API<br/>Mock JSON Generator]
         I[Docs<br/>Swagger UI / OpenAPI]
     end
 
@@ -43,6 +44,7 @@ graph TB
     E --> H
     E --> J2
     E --> S
+    E --> M
     E --> I
     F -->|put / get / delete| J
     E -.->|Rate Limit Counter| J
@@ -63,6 +65,7 @@ graph TB
    ├── GET  /qr          → QR 코드 생성 (SVG/JSON)
    ├── GET  /encode      → 텍스트 인코딩 (Base64, URL, Hex 등)
    ├── GET  /decode      → 데이터 디코딩
+   ├── GET  /edgeforge   → 가짜(Mock) JSON 응답 생성
    ├── GET  /openapi.json → OpenAPI 3.0 스펙
    └── GET  / 또는 /docs  → Swagger UI
 ```
@@ -112,6 +115,7 @@ sequenceDiagram
 | **QR Code** | QR 코드 생성 (SVG/JSON, WiFi·vCard·이메일 등 지원) |
 | **Encode/Decode** | 다양한 형식의 인코딩/디코딩 (Base64, URL, HTML, Hex 등) |
 | **Security API (Beta)** | HTTP 보안 헤더 분석 및 등급 산출 |
+| **EdgeForge API (Beta)** | 테스트를 위한 가짜(Mock) JSON 응답 생성기 |
 
 ---
 
@@ -374,6 +378,39 @@ curl "https://api.kalpha.kr/security/headers?url=https://example.com"
 
 ---
 
+## EdgeForge API (Beta)
+
+> 🛠️ **개발 중 알림**: 이 API는 현재 개발 중인 베타 버전입니다.
+
+프론트엔드 개발 시 백엔드 API가 아직 연동되지 않았거나 에러 상황을 테스트해야 할 때, 원하는 형태의 가짜(Mock) JSON 응답과 지연 시간을 설정해 반환받을 수 있습니다. GET 및 POST 요청을 모두 지원합니다.
+
+### 사용법 및 옵션 설정
+
+```bash
+# 기본 호출
+curl "https://api.kalpha.kr/edgeforge"
+
+# 상태 코드 조작 (에러 응답 시뮬레이션)
+curl -i "https://api.kalpha.kr/edgeforge?status=404"
+
+# 네트워크 지연 시뮬레이션 (2초 후 응답)
+curl -i "https://api.kalpha.kr/edgeforge?delay=2000"
+
+# 커스텀 JSON Payload 반환 (URL 인코딩 필요)
+curl "https://api.kalpha.kr/edgeforge?status=201&delay=500&body=%7B%22success%22%3Atrue%7D"
+
+# 단순 쿼리 파라미터를 JSON으로 반환 (Fallback 방식)
+curl "https://api.kalpha.kr/edgeforge?name=John&role=admin"
+```
+
+### 엔드포인트 요약
+
+| 메서드 | 경로 | 설명 |
+|--------|------|------|
+| `GET / POST` | `/edgeforge` | 지정된 상태 코드, 지연 시간, 페이로드를 포함한 Mock JSON 응답 반환 |
+
+---
+
 ## 인증
 
 배포 환경에서 `API_KEY`를 설정하면 `POST /store` 및 `GET /read/{id}` 요청에 Bearer 토큰 인증을 요구할 수 있습니다.
@@ -412,7 +449,8 @@ src/
     ├── ip.ts         # IP Info API 핸들러
     ├── qr.ts         # QR Code API 핸들러
     ├── encode.ts     # Encode/Decode API 핸들러
-    └── security.ts   # Security API 핸들러
+    ├── security.ts   # Security API 핸들러
+    └── edgeforge.ts  # EdgeForge API 핸들러
 ```
 
 ### 로컬 개발

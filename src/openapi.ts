@@ -14,6 +14,7 @@ export const OPENAPI = {
     { name: 'QR Code', description: 'QR 코드 생성 (SVG/JSON, WiFi·vCard·이메일 등 지원)' },
     { name: 'Encode/Decode', description: '다양한 형식의 인코딩/디코딩 (Base64, URL, HTML, Hex 등)' },
     { name: 'Security', description: '보안 관련 유틸리티 (헤더 점검 등)' },
+    { name: 'EdgeForge (BETA)', description: '가짜(Mock) JSON 응답 생성기' },
   ],
   components: {
     securitySchemes: {
@@ -302,6 +303,40 @@ export const OPENAPI = {
             content: { 'application/json': { schema: { $ref: '#/components/schemas/SecurityHeaderResponse' } } },
           },
           '400': { description: 'Bad Request', content: { 'application/json': { schema: { $ref: '#/components/schemas/ErrorResponse' } } } },
+        },
+      },
+    },
+    // ── EdgeForge (BETA) ──
+    '/edgeforge': {
+      get: {
+        tags: ['EdgeForge (BETA)'],
+        summary: 'Generate a mock JSON response',
+        description: 'Returns a customizable JSON response for testing purposes. You can specify the HTTP status, delay, and JSON payload.',
+        parameters: [
+          { name: 'status', in: 'query', description: 'HTTP status code to return (default: 200)', schema: { type: 'integer', default: 200 } },
+          { name: 'delay', in: 'query', description: 'Network delay in milliseconds (max: 10000)', schema: { type: 'integer', default: 0 } },
+          { name: 'body', in: 'query', description: 'Custom JSON payload to return', schema: { type: 'string' } },
+        ],
+        responses: {
+          'default': {
+            description: 'Mocked response with the requested parameters',
+            content: { 'application/json': { schema: { type: 'object' } } },
+          },
+        },
+      },
+      post: {
+        tags: ['EdgeForge (BETA)'],
+        summary: 'Generate a mock JSON response',
+        description: 'Alternative method to generate a customizable JSON response (same as GET).',
+        parameters: [
+          { name: 'status', in: 'query', description: 'HTTP status code to return (default: 200)', schema: { type: 'integer', default: 200 } },
+          { name: 'delay', in: 'query', description: 'Network delay in milliseconds (max: 10000)', schema: { type: 'integer', default: 0 } },
+        ],
+        responses: {
+          'default': {
+            description: 'Mocked response with the requested parameters',
+            content: { 'application/json': { schema: { type: 'object' } } },
+          },
         },
       },
     },

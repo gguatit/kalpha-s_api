@@ -8,6 +8,7 @@ import { handleQr } from './handlers/qr';
 import { handleEncode, handleDecode } from './handlers/encode';
 import { handleSecurityHeaders } from './handlers/security';
 import { MAX_MESSAGE_LENGTH, UUID_REGEX, CORS_HEADERS, jsonResponse } from './helpers';
+import { handleEdgeForge } from './handlers/edgeforge';
 
 export type { Env };
 
@@ -124,6 +125,13 @@ export default {
     // GET /security/headers — 보안 헤더 점검
     if (request.method === 'GET' && pathname === '/security/headers') {
       return handleSecurityHeaders(request);
+    }
+
+    // ─── EdgeForge (BETA) ──────────────────────────
+
+    // GET or POST /edgeforge — 가짜 응답 생성
+    if ((request.method === 'GET' || request.method === 'POST') && pathname === '/edgeforge') {
+      return handleEdgeForge(request);
     }
 
     // ─── Docs ────────────────────────────────────
