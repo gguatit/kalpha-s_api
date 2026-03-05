@@ -6,6 +6,33 @@ interface HeaderAnalysis {
     message: string;
 }
 
+// SSRF 방어: 차단할 호스트명/IP 패턴
+const BLOCKED_HOSTS = [
+    /^localhost$/i,
+    /^127\.\d+\.\d+\.\d+$/,       // 127.0.0.0/8
+    /^10\.\d+\.\d+\.\d+$/,        // 10.0.0.0/8
+    /^172\.(1[6-9]|2\d|3[01])\.\d+\.\d+$/,  // 172.16.0.0/12
+    /^192\.168\.\d+\.\d+$/,       // 192.168.0.0/16
+    /^169\.254\.\d+\.\d+$/,       // 링크 로컬 (AWS metadata 등)
+    /^::1$/,                       // IPv6 루프백
+    /^0\.0\.0\.0$/,
+    /^fd[0-9a-f]{2}:/i,            // IPv6 ULA
+];
+
+// SSRF 방어: 허용된 도메인 (subdomain 포함)
+const ALLOWED_HOSTS = [
+    /(?:^|\.)kalpha\.mmv\.kr$/i,
+    /(?:^|\.)kalpha\.kr$/i,
+];
+
+function isSsrfBlocked(hostname: string): boolean {
+    // 허용 목록에 있으면 무조건 통과
+    if (ALLOWED_HOSTS.some((r) => r.test(hostname))) return false;
+    // 차단 패턴에 해당하면 거부
+    if (BLOCKED_HOSTS.some((r) => r.test(hostname))) return true;
+    return false;
+}
+
 export async function handleSecurityHeaders(request: Request) {
     const urlParam = new URL(request.url).searchParams.get('url');
 
@@ -28,6 +55,10 @@ export async function handleSecurityHeaders(request: Request) {
         }
     } catch (e) {
         return jsonResponse({ error: 'invalid url format' }, 400);
+    }
+
+    if (isSsrfBlocked(targetUrl.hostname)) {
+        return jsonResponse({ error: 'target url is not allowed' }, 403);
     }
 
     try {
@@ -187,8 +218,8 @@ export async function handleSecurityHeaders(request: Request) {
             url: response.url || targetUrl.toString(),
             pageType,
             statusCode,
-            score: grade,
-            grade: score,
+            score,
+            grade,
             headers: Object.fromEntries(headers.entries()),
             analysis: analysis,
         };

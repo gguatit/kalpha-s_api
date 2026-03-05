@@ -7,7 +7,11 @@ function timingSafeEqual(a: string, b: string): boolean {
     const aBuf = encoder.encode(a);
     const bBuf = encoder.encode(b);
     if (aBuf.byteLength !== bBuf.byteLength) return false;
-    return (crypto.subtle as any).timingSafeEqual(aBuf, bBuf);
+    let diff = 0;
+    for (let i = 0; i < aBuf.byteLength; i++) {
+        diff |= aBuf[i] ^ bBuf[i];
+    }
+    return diff === 0;
 }
 
 /**

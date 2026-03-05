@@ -141,13 +141,18 @@ export function handleQr(request: Request): Response {
         return jsonResponse({ error: 'data too long (max 2000 characters)' }, 413);
     }
 
+    // CSS 컬러 sanitize — hex 형식만 허용 (#rgb / #rrggbb / #rrggbbaa)
+    const CSS_COLOR_RE = /^#[0-9a-fA-F]{3}(?:[0-9a-fA-F]{3}(?:[0-9a-fA-F]{2})?)?$/;
+    const sanitizeColor = (val: string | null, fallback: string): string =>
+        val && CSS_COLOR_RE.test(val.trim()) ? val.trim() : fallback;
+
     // 옵션 파싱
     const ecl = (['L', 'M', 'Q', 'H'].includes(params.get('ecl') || '')
         ? params.get('ecl')!
         : 'M') as ErrorCorrectionLevel;
     const size = Math.min(1000, Math.max(50, parseInt(params.get('size') || '300', 10)));
-    const color = params.get('color') || '#000000';
-    const bg = params.get('bg') || '#ffffff';
+    const color = sanitizeColor(params.get('color'), '#000000');
+    const bg = sanitizeColor(params.get('bg'), '#ffffff');
     const format = params.get('format') === 'json' ? 'json' : 'svg';
     const margin = Math.min(10, Math.max(0, parseInt(params.get('margin') || '2', 10)));
 

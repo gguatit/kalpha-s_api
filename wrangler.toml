@@ -15,7 +15,7 @@ kv_namespaces = [
 
 # ── Observability (로그 영구 저장) ──
 [observability]
-enabled = false
+enabled = true
 head_sampling_rate = 1
 
 [observability.logs]
