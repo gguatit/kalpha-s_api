@@ -62,14 +62,33 @@ export async function handleSecurityHeaders(request: Request) {
     }
 
     try {
-        // 1. Fetch and follow redirects
-        const response = await fetch(targetUrl.toString(), {
+        // 1. Fetch — 리다이렉트를 수동으로 따라가며 각 단계에서 SSRF 검사
+        let currentUrl = targetUrl;
+        let response = await fetch(currentUrl.toString(), {
             method: 'GET',
-            headers: {
-                'User-Agent': "Kalpha's Security Inspector/1.0",
-            },
-            redirect: 'follow',
+            headers: { 'User-Agent': "Kalpha's Security Inspector/1.0" },
+            redirect: 'manual',
         });
+
+        for (let hop = 0; hop < 5 && response.status >= 300 && response.status < 400; hop++) {
+            const location = response.headers.get('location');
+            if (!location) break;
+            let nextUrl: URL;
+            try {
+                nextUrl = new URL(location, currentUrl.toString());
+            } catch {
+                return jsonResponse({ error: 'invalid redirect location' }, 502);
+            }
+            if (!['http:', 'https:'].includes(nextUrl.protocol) || isSsrfBlocked(nextUrl.hostname)) {
+                return jsonResponse({ error: 'target url is not allowed' }, 403);
+            }
+            currentUrl = nextUrl;
+            response = await fetch(currentUrl.toString(), {
+                method: 'GET',
+                headers: { 'User-Agent': "Kalpha's Security Inspector/1.0" },
+                redirect: 'manual',
+            });
+        }
 
         const headers = response.headers;
         const analysis: HeaderAnalysis[] = [];
@@ -215,7 +234,7 @@ export async function handleSecurityHeaders(request: Request) {
         else if (score >= 40) grade = 'D';
 
         const result = {
-            url: response.url || targetUrl.toString(),
+            url: currentUrl.toString(),
             pageType,
             statusCode,
             score,
@@ -227,6 +246,6 @@ export async function handleSecurityHeaders(request: Request) {
         return jsonResponse(result, 200);
     } catch (e: any) {
         console.error('[handleSecurityHeaders] fetch error:', e);
-        return jsonResponse({ error: 'failed to fetch target url', details: e.message }, 502);
+        return jsonResponse({ error: 'failed to fetch target url' }, 502);
     }
 }

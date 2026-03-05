@@ -13,11 +13,16 @@ export async function checkRateLimit(
     request: Request,
     env: Env,
 ): Promise<Response | null> {
-    const ip = request.headers.get('cf-connecting-ip') || 'unknown';
+    const ip = request.headers.get('cf-connecting-ip');
+    if (!ip) return null; // cf-connecting-ip 없으면 rate limiting 건너뜀 (Workers 외부 환경 등)
     const key = `ratelimit:${ip}`;
 
     const current = await env.DEAD_DROP.get(key);
     const count = current ? parseInt(current, 10) : 0;
+    if (isNaN(count)) {
+        await env.DEAD_DROP.put(key, '1', { expirationTtl: RATE_LIMIT_WINDOW });
+        return null;
+    }
 
     if (count >= RATE_LIMIT_MAX_REQUESTS) {
         return jsonResponse(

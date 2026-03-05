@@ -19,10 +19,13 @@ function buildStructuredData(type: string, params: URLSearchParams): string | nu
         case 'wifi': {
             const ssid = params.get('ssid');
             const password = params.get('password') || '';
-            const encryption = params.get('encryption') || 'WPA'; // WPA, WEP, nopass
+            const encRaw = params.get('encryption') || 'WPA';
+            const encryption = ['WPA', 'WEP', 'nopass'].includes(encRaw) ? encRaw : 'WPA';
             const hidden = params.get('hidden') === 'true' ? 'H:true' : '';
             if (!ssid) return null;
-            return `WIFI:T:${encryption};S:${ssid};P:${password};${hidden};`;
+            // WiFi QR 포맷 특수문자 이스케이프: \, ;, ,, ", :
+            const esc = (s: string) => s.replace(/[\\;,":]/g, (c) => `\\${c}`);
+            return `WIFI:T:${encryption};S:${esc(ssid)};P:${esc(password)};${hidden};`;
         }
         case 'email': {
             const to = params.get('to');
