@@ -26,7 +26,7 @@ graph TB
         G[IP Info<br/>Full / Simple]
         H[QR Code<br/>SVG / JSON]
         J2[Encode/Decode<br/>Base64 / URL / Hex 등]
-        S[Security API<br/>Header Inspector / Beta]
+        S[Security API<br/>Header Inspector]
         M[EdgeForge API<br/>Mock JSON Generator]
         I[Docs<br/>Swagger UI / OpenAPI]
     end
@@ -114,7 +114,7 @@ sequenceDiagram
 | **IP Info** | 요청자의 IP 주소 및 지리/네트워크 정보 조회 |
 | **QR Code** | QR 코드 생성 (SVG/JSON, WiFi·vCard·이메일 등 지원) |
 | **Encode/Decode** | 다양한 형식의 인코딩/디코딩 (Base64, URL, HTML, Hex 등) |
-| **Security API (Beta)** | HTTP 보안 헤더 분석 및 등급 산출 |
+| **Security API** | HTTP 보안 헤더 분석 및 등급 산출 |
 | **EdgeForge API (Beta)** | 테스트를 위한 가짜(Mock) JSON 응답 생성기 |
 
 ---
@@ -337,9 +337,7 @@ curl "https://api.kalpha.kr/decode?data=hello%20world&format=url"
 
 ---
 
-## Security API (Beta)
-
-> 🛠️ **개발 중 알림**: 이 API는 현재 개발 중인 베타 버전이므로, 모든 결과가 완벽하지 않을 수 있습니다.
+## Security API
 
 대상 URL의 HTTP 보안 헤더를 정밀하게 분석하여 보안 점수(A+ ~ F)와 상세 보고서를 제공합니다.
 
