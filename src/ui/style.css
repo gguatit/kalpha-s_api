@@ -28,6 +28,8 @@ body {
     radial-gradient(circle at 82% 78%, rgba(0, 0, 0, 0.05), transparent 38%),
     repeating-linear-gradient(120deg, rgba(0, 0, 0, 0.022) 0, rgba(0, 0, 0, 0.022) 1px, transparent 1px, transparent 11px),
     var(--bg-main);
+  background-size: auto, auto, 220px 220px, auto;
+  animation: background-diagonal-flow 22s linear infinite;
   color: var(--text-main);
   line-height: 1.66;
 }
@@ -320,5 +322,27 @@ header p {
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes background-diagonal-flow {
+  from {
+    background-position: 0 0, 0 0, 0 0, 0 0;
+  }
+  to {
+    background-position: 0 0, 0 0, 220px -220px, 0 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body {
+    animation: none;
+  }
+
+  header,
+  .section,
+  .api-card::before {
+    animation: none;
+    transition: none;
   }
 }
