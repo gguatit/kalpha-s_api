@@ -5,8 +5,6 @@ import { DOCS_HTML } from './docs';
 import INDEX_HTML from './ui/index.html';
 // @ts-ignore
 import STYLE_CSS from './ui/style.css';
-// @ts-ignore
-import SCRIPT_JS from './ui/script.js';
 import { requireAuth } from './auth';
 import { checkRateLimit } from './ratelimit';
 import { handleIpFull, handleIpSimple } from './handlers/ip';
@@ -171,13 +169,6 @@ export default {
       return new Response(STYLE_CSS, {
         status: 200,
         headers: { 'content-type': 'text/css; charset=utf-8', ...CORS_HEADERS },
-      });
-    }
-
-    if (request.method === 'GET' && pathname === '/assets/script.js') {
-      return new Response(SCRIPT_JS, {
-        status: 200,
-        headers: { 'content-type': 'application/javascript; charset=utf-8', ...CORS_HEADERS },
       });
     }
 
