@@ -1,6 +1,7 @@
 import type { Env } from './types';
 import OPENAPI from './openapi';
 import { DOCS_HTML } from './docs';
+import { LANDING_HTML } from './landing';
 import { requireAuth } from './auth';
 import { checkRateLimit } from './ratelimit';
 import { handleIpFull, handleIpSimple } from './handlers/ip';
@@ -145,8 +146,16 @@ export default {
     }
 
     // GET / or /docs — Swagger UI
-    if (request.method === 'GET' && (pathname === '/' || pathname === '/docs')) {
+    if (request.method === 'GET' && pathname === '/docs') {
       return new Response(DOCS_HTML, {
+        status: 200,
+        headers: { 'content-type': 'text/html; charset=utf-8', ...CORS_HEADERS },
+      });
+    }
+
+    // GET / ??Landing Page
+    if (request.method === 'GET' && pathname === '/') {
+      return new Response(LANDING_HTML, {
         status: 200,
         headers: { 'content-type': 'text/html; charset=utf-8', ...CORS_HEADERS },
       });
