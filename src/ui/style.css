@@ -29,7 +29,6 @@ body {
     repeating-linear-gradient(120deg, rgba(0, 0, 0, 0.022) 0, rgba(0, 0, 0, 0.022) 2px, transparent 2px, transparent 12px),
     var(--bg-main);
   background-size: auto, auto, 220px 220px, auto;
-  animation: background-diagonal-flow 18s linear infinite;
   color: var(--text-main);
   line-height: 1.66;
 }
@@ -42,7 +41,6 @@ header {
   background:
     linear-gradient(165deg, rgba(255, 255, 255, 0.95), rgba(240, 240, 236, 0.9));
   box-shadow: var(--shadow-soft);
-  animation: rise-in 520ms ease-out both;
 }
 
 header::before {
@@ -83,27 +81,6 @@ header p {
   box-shadow: var(--shadow-card);
   border-radius: 14px;
   backdrop-filter: blur(2px);
-  animation: rise-in 480ms ease-out both;
-}
-
-.section:nth-of-type(1) {
-  animation-delay: 50ms;
-}
-
-.section:nth-of-type(2) {
-  animation-delay: 90ms;
-}
-
-.section:nth-of-type(3) {
-  animation-delay: 130ms;
-}
-
-.section:nth-of-type(4) {
-  animation-delay: 170ms;
-}
-
-.section:nth-of-type(5) {
-  animation-delay: 210ms;
 }
 
 .section > h2 {
@@ -143,7 +120,6 @@ header p {
   padding: 1.15rem 1.1rem 1.15rem;
   background:
     linear-gradient(170deg, rgba(255, 255, 255, 0.95), rgba(246, 246, 243, 0.88));
-  transition: border-color 260ms ease, box-shadow 260ms ease, background 320ms ease;
 }
 
 .api-card::before {
@@ -152,8 +128,6 @@ header p {
   inset: 0;
   background: linear-gradient(112deg, transparent 0%, transparent 34%, rgba(255, 255, 255, 0.45) 50%, transparent 66%, transparent 100%);
   opacity: 0;
-  transform: translateX(-130%);
-  transition: transform 620ms ease, opacity 300ms ease;
   pointer-events: none;
   z-index: 0;
 }
@@ -186,8 +160,7 @@ header p {
 
 .api-card:hover::before,
 .api-card:focus-within::before {
-  opacity: 0.9;
-  transform: translateX(120%);
+  opacity: 0;
 }
 
 .api-card h3 {
@@ -219,7 +192,6 @@ header p {
   background: var(--bg-soft);
   color: var(--text-main);
   font-size: 0.92rem;
-  transition: border-color 180ms ease, box-shadow 180ms ease, background-color 180ms ease;
 }
 
 .input-group input::placeholder {
@@ -249,17 +221,15 @@ header p {
   font-weight: 600;
   letter-spacing: 0.01em;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 7px 16px rgba(0, 0, 0, 0.22);
-  transition: transform 180ms ease, box-shadow 180ms ease, background 180ms ease;
 }
 
 .btn:hover {
-  transform: translateY(-1px);
   background: linear-gradient(180deg, #121212, #040404);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18), 0 10px 20px rgba(0, 0, 0, 0.25);
 }
 
 .btn:active {
-  transform: translateY(0);
+  background: linear-gradient(180deg, #0e0e0e, #030303);
 }
 
 .result-box {
@@ -314,35 +284,9 @@ header p {
   }
 }
 
-@keyframes rise-in {
-  from {
-    opacity: 0;
-    transform: translateY(12px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes background-diagonal-flow {
-  from {
-    background-position: 0 0, 0 0, 0 0, 0 0;
-  }
-  to {
-    background-position: 0 0, 0 0, 220px -220px, 0 0;
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
-  body {
-    animation: none;
-  }
-
-  header,
-  .section,
-  .api-card::before {
-    animation: none;
-    transition: none;
+  * {
+    animation: none !important;
+    transition: none !important;
   }
 }
