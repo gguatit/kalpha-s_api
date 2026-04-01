@@ -38,23 +38,54 @@ export default {
 
     // POST /store — 메시지 저장
     if (request.method === 'POST' && pathname === '/store') {
-      try {
-        const contentType = request.headers.get('content-type') || '';
-        let body: any;
-        if (contentType.includes('application/json')) {
-          body = await request.json();
-        } else {
-          const text = await request.text();
-          body = { message: text };
-        }
-        const message = typeof body?.message === 'string' ? body.message.trim() : '';
-        if (!message) {
-          return jsonResponse({ error: 'missing message' }, 400);
-        }
-        if (message.length > MAX_MESSAGE_LENGTH) {
-          return jsonResponse({ error: 'message too long' }, 413);
-        }
+      const contentType = (request.headers.get('content-type') || '').toLowerCase();
 
+      let message = '';
+      try {
+        const raw = await request.text();
+        const trimmed = raw.trim();
+
+        if (contentType.includes('application/json')) {
+          try {
+            const parsed: unknown = JSON.parse(raw);
+            if (typeof parsed === 'string') {
+              message = parsed.trim();
+            } else if (
+              parsed &&
+              typeof parsed === 'object' &&
+              'message' in parsed &&
+              typeof (parsed as { message?: unknown }).message === 'string'
+            ) {
+              message = ((parsed as { message: string }).message || '').trim();
+            } else {
+              return jsonResponse({ error: 'invalid body' }, 400);
+            }
+          } catch {
+            // 일부 클라이언트가 JSON content-type으로 plain text를 보내는 경우를 허용합니다.
+            message = trimmed;
+          }
+        } else if (contentType.includes('application/x-www-form-urlencoded')) {
+          const params = new URLSearchParams(raw);
+          message = (params.get('message') || '').trim();
+          if (!message) {
+            message = trimmed;
+          }
+        } else {
+          message = trimmed;
+        }
+      } catch (e) {
+        console.error('[POST /store] body parse error:', e);
+        return jsonResponse({ error: 'invalid body' }, 400);
+      }
+
+      if (!message) {
+        return jsonResponse({ error: 'missing message' }, 400);
+      }
+      if (message.length > MAX_MESSAGE_LENGTH) {
+        return jsonResponse({ error: 'message too long' }, 413);
+      }
+
+      try {
         const id = crypto.randomUUID();
         await env.DEAD_DROP.put(id, message, { expirationTtl: 3600 });
 
@@ -67,8 +98,8 @@ export default {
 
         return new Response(JSON.stringify({ id }), { status: 201, headers: respHeaders });
       } catch (e) {
-        console.error('[POST /store] error:', e);
-        return jsonResponse({ error: 'invalid body' }, 400);
+        console.error('[POST /store] storage error:', e);
+        return jsonResponse({ error: 'internal error' }, 500);
       }
     }
 
