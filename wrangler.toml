@@ -1,7 +1,10 @@
 name = "api"
 main = "src/index.ts"
 compatibility_date = "2025-12-25"
-
+[[rules]]
+type = "Text"
+globs = ["**/*.html", "**/*.css", "**/*.js"]
+fallthrough = true
 # ── Production ──
 kv_namespaces = [
   { binding = "DEAD_DROP", id = "35daf343d0244b989e423bf1bc0baf5e" }
