@@ -11,7 +11,7 @@ import { handleIpFull, handleIpSimple } from './handlers/ip';
 import { handleQr } from './handlers/qr';
 import { handleEncode, handleDecode } from './handlers/encode';
 import { handleSecurityHeaders } from './handlers/security';
-import { MAX_MESSAGE_LENGTH, UUID_REGEX, CORS_HEADERS, jsonResponse } from './helpers';
+import { MAX_MESSAGE_LENGTH, UUID_REGEX, getCorsHeaders, isOriginAllowed, jsonResponse, withCors } from './helpers';
 import { handleEdgeForge } from './handlers/edgeforge';
 
 export type { Env };
@@ -20,19 +20,24 @@ export default {
   async fetch(request: Request, env: Env) {
     const url = new URL(request.url);
     const pathname = url.pathname;
+    const respond = (response: Response): Response => withCors(request, env, response);
 
     // Preflight
     if (request.method === 'OPTIONS') {
-      return new Response(null, { status: 204, headers: CORS_HEADERS });
+      const origin = request.headers.get('origin');
+      if (origin && !isOriginAllowed(origin, env)) {
+        return respond(jsonResponse({ error: 'origin not allowed' }, 403));
+      }
+      return new Response(null, { status: 204, headers: getCorsHeaders(request, env) });
     }
 
     // Auth
     const authFail = requireAuth(request, env, pathname);
-    if (authFail) return authFail;
+    if (authFail) return respond(authFail);
 
     // Rate Limiting
     const rateLimited = await checkRateLimit(request, env);
-    if (rateLimited) return rateLimited;
+    if (rateLimited) return respond(rateLimited);
 
     // ─── Dead Drop API ───────────────────────────
 
@@ -58,7 +63,7 @@ export default {
             ) {
               message = ((parsed as { message: string }).message || '').trim();
             } else {
-              return jsonResponse({ error: 'invalid body' }, 400);
+              return respond(jsonResponse({ error: 'invalid body' }, 400));
             }
           } catch {
             // 일부 클라이언트가 JSON content-type으로 plain text를 보내는 경우를 허용합니다.
@@ -75,14 +80,14 @@ export default {
         }
       } catch (e) {
         console.error('[POST /store] body parse error:', e);
-        return jsonResponse({ error: 'invalid body' }, 400);
+        return respond(jsonResponse({ error: 'invalid body' }, 400));
       }
 
       if (!message) {
-        return jsonResponse({ error: 'missing message' }, 400);
+        return respond(jsonResponse({ error: 'missing message' }, 400));
       }
       if (message.length > MAX_MESSAGE_LENGTH) {
-        return jsonResponse({ error: 'message too long' }, 413);
+        return respond(jsonResponse({ error: 'message too long' }, 413));
       }
 
       try {
@@ -93,13 +98,12 @@ export default {
           'content-type': 'application/json',
           'Location': `${url.origin}/read/${id}`,
           'X-DeadDrop-Id': id,
-          ...CORS_HEADERS,
         } as Record<string, string>;
 
-        return new Response(JSON.stringify({ id }), { status: 201, headers: respHeaders });
+        return respond(new Response(JSON.stringify({ id }), { status: 201, headers: respHeaders }));
       } catch (e) {
         console.error('[POST /store] storage error:', e);
-        return jsonResponse({ error: 'internal error' }, 500);
+        return respond(jsonResponse({ error: 'internal error' }, 500));
       }
     }
 
@@ -108,19 +112,19 @@ export default {
       try {
         const parts = pathname.split('/');
         const id = parts[parts.length - 1];
-        if (!id) return jsonResponse({ error: 'missing id' }, 400);
-        if (!UUID_REGEX.test(id)) return jsonResponse({ error: 'invalid id format' }, 400);
+        if (!id) return respond(jsonResponse({ error: 'missing id' }, 400));
+        if (!UUID_REGEX.test(id)) return respond(jsonResponse({ error: 'invalid id format' }, 400));
 
         const message = await env.DEAD_DROP.get(id);
         if (message === null) {
-          return jsonResponse({ error: 'not found or already read' }, 404);
+          return respond(jsonResponse({ error: 'not found or already read' }, 404));
         }
 
         await env.DEAD_DROP.delete(id);
-        return jsonResponse({ message }, 200);
+        return respond(jsonResponse({ message }, 200));
       } catch (e) {
         console.error('[GET /read] error:', e);
-        return jsonResponse({ error: 'internal error' }, 500);
+        return respond(jsonResponse({ error: 'internal error' }, 500));
       }
     }
 
@@ -128,81 +132,81 @@ export default {
 
     // GET /ip — 전체 IP 정보 (JSON)
     if (request.method === 'GET' && pathname === '/ip') {
-      return handleIpFull(request);
+      return respond(handleIpFull(request));
     }
 
     // GET /ip/simple — IP 주소만 (텍스트)
     if (request.method === 'GET' && pathname === '/ip/simple') {
-      return handleIpSimple(request);
+      return respond(handleIpSimple(request));
     }
 
     // ─── QR Code API ─────────────────────────────
 
     // GET /qr — QR 코드 생성 (SVG 또는 JSON)
     if (request.method === 'GET' && pathname === '/qr') {
-      return handleQr(request);
+      return respond(handleQr(request));
     }
 
     // ─── Encode/Decode API ─────────────────────────
 
     // GET /encode — 인코딩
     if (request.method === 'GET' && pathname === '/encode') {
-      return handleEncode(request);
+      return respond(handleEncode(request));
     }
 
     // GET /decode — 디코딩
     if (request.method === 'GET' && pathname === '/decode') {
-      return handleDecode(request);
+      return respond(handleDecode(request));
     }
 
     // ─── Security API ──────────────────────────────
 
     // GET /security/headers — 보안 헤더 점검
     if (request.method === 'GET' && pathname === '/security/headers') {
-      return handleSecurityHeaders(request);
+      return respond(await handleSecurityHeaders(request));
     }
 
     // ─── EdgeForge (BETA) ──────────────────────────
 
     // GET or POST /edgeforge — 가짜 응답 생성
     if ((request.method === 'GET' || request.method === 'POST') && pathname === '/edgeforge') {
-      return handleEdgeForge(request);
+      return respond(await handleEdgeForge(request));
     }
 
     // ─── Docs ────────────────────────────────────
 
     // GET /openapi.json
     if (request.method === 'GET' && pathname === '/openapi.json') {
-      return new Response(JSON.stringify(OPENAPI), {
+      return respond(new Response(JSON.stringify(OPENAPI), {
         status: 200,
-        headers: { 'content-type': 'application/json; charset=utf-8', ...CORS_HEADERS },
-      });
+        headers: { 'content-type': 'application/json; charset=utf-8' },
+      }));
     }
 
     // GET / or /docs — Swagger UI
     if (request.method === 'GET' && pathname === '/docs') {
-      return new Response(DOCS_HTML, {
+      return respond(new Response(DOCS_HTML, {
         status: 200,
-        headers: { 'content-type': 'text/html; charset=utf-8', ...CORS_HEADERS },
-      });
+        headers: { 'content-type': 'text/html; charset=utf-8' },
+      }));
     }
 
     // GET / ??Landing Page
     if (request.method === 'GET' && pathname === '/') {
-      return new Response(INDEX_HTML, {
+      return respond(new Response(INDEX_HTML, {
         status: 200,
-        headers: { 'content-type': 'text/html; charset=utf-8', ...CORS_HEADERS },
-      });
+        headers: { 'content-type': 'text/html; charset=utf-8' },
+      }));
     }
 
     // Static Assets for UI
     if (request.method === 'GET' && pathname === '/assets/style.css') {
-      return new Response(STYLE_CSS, {
+      return respond(new Response(STYLE_CSS, {
         status: 200,
-        headers: { 'content-type': 'text/css; charset=utf-8', ...CORS_HEADERS },
-      });
+        headers: { 'content-type': 'text/css; charset=utf-8' },
+      }));
     }
 
-    return jsonResponse({ error: 'not found' }, 404);
+    return respond(jsonResponse({ error: 'not found' }, 404));
   },
 };
