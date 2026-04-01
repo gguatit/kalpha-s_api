@@ -26,10 +26,10 @@ body {
   background:
     radial-gradient(circle at 18% 12%, rgba(255, 255, 255, 0.65), transparent 40%),
     radial-gradient(circle at 82% 78%, rgba(0, 0, 0, 0.05), transparent 38%),
-    repeating-linear-gradient(120deg, rgba(0, 0, 0, 0.022) 0, rgba(0, 0, 0, 0.022) 1px, transparent 1px, transparent 11px),
+    repeating-linear-gradient(120deg, rgba(0, 0, 0, 0.022) 0, rgba(0, 0, 0, 0.022) 2px, transparent 2px, transparent 12px),
     var(--bg-main);
   background-size: auto, auto, 220px 220px, auto;
-  animation: background-diagonal-flow 22s linear infinite;
+  animation: background-diagonal-flow 18s linear infinite;
   color: var(--text-main);
   line-height: 1.66;
 }
