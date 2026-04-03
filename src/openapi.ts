@@ -15,7 +15,7 @@ export const OPENAPI = {
     { name: 'Encode/Decode', description: '다양한 형식의 인코딩/디코딩 (Base64, URL, HTML, Hex 등)' },
     { name: 'Security', description: '보안 관련 유틸리티 (헤더 점검 등)' },
     { name: 'EdgeForge (BETA)', description: '가짜(Mock) JSON 응답 생성기' },
-    { name: 'Fun / Easter Egg', description: '소소한 유틸리티 기능들' },
+    { name: 'Tarpit', description: '악성 봇 지연용 허니팟 API' },
   ],
   components: {
     securitySchemes: {
@@ -348,7 +348,7 @@ export const OPENAPI = {
     // ── Tarpit ──
     '/.env': {
       get: {
-        tags: ['Fun / Easter Egg'],
+        tags: ['Tarpit'],
         summary: 'API Tarpit (Honeypot)',
         description: '악성 봇과 스캐너를 묶어두기 위한 엔드포인트입니다. `/.env` 외에도 `/wp-admin`, `/.git/config` 등 자주 스캔되는 30여개의 경로에 접속할 경우 작동하며 30초 동안 1초 간격으로 무의미한 데이터를 흘려보냅니다.',
         responses: {
