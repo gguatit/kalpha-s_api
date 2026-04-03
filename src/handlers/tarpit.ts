@@ -1,24 +1,28 @@
 export const tarpitPaths = [
   // Environment & Config
-  '/.env', '/.env.example', '/.env.local', '/.env.prod', '/.env.staging', '/.env.backup', '/.env.save',
-  '/config.json', '/database.yml', '/docker-compose.yml', '/nginx.conf',
+  '/.env', '/.env.example', '/.env.local', '/.env.prod', '/.env.staging', '/.env.backup', '/.env.save', '/.env.dev', '/.env.test',
+  '/config.json', '/config.yml', '/database.yml', '/docker-compose.yml', '/docker-compose.yaml', '/nginx.conf',
+
+  // System & Credentials
+  '/.ssh/id_rsa', '/.aws/credentials', '/etc/passwd', '/server-status', '/.vscode/sftp.json',
 
   // WordPress & PHP
   '/wp-admin', '/wp-login.php', '/wp-config.php', '/wp-config.php.bak', '/wp-content/debug.log', '/xmlrpc.php',
-  '/phpmyadmin', '/pma', '/phpMyAdmin', '/admin.php',
+  '/phpmyadmin', '/pma', '/phpMyAdmin', '/admin.php', '/phpinfo.php', '/info.php', '/test.php',
+  '/bitrix/admin/', '/administrator/', // Joomla & Bitrix
 
   // Git & Version Control
-  '/.git/config', '/.git/HEAD', '/.gitignore', '/.svn/entries',
+  '/.git/config', '/.git/HEAD', '/.gitignore', '/.svn/entries', '/.DS_Store',
 
   // Admin panels & Dashboards
-  '/admin', '/administrator', '/dashboard', '/manager', '/panel',
+  '/admin', '/administrator', '/dashboard', '/manager', '/panel', '/_profiler/phpinfo',
 
   // Spring Boot / Java
-  '/actuator/env', '/actuator/health', '/actuator/metrics', '/actuator/httptrace',
-  '/swagger-ui.html', '/v2/api-docs', '/v3/api-docs',
+  '/actuator', '/actuator/', '/actuator/env', '/actuator/health', '/actuator/metrics', '/actuator/httptrace', '/actuator/heapdump',
+  '/swagger-ui.html', '/v2/api-docs', '/v3/api-docs', '/swagger-ui/',
 
   // Backups & SQL dumps
-  '/backup.zip', '/backup.sql', '/dump.sql', '/db.sql', '/database.sql', '/backup.tar.gz',
+  '/backup.zip', '/backup.sql', '/dump.sql', '/db.sql', '/database.sql', '/backup.tar.gz', '/data.sql',
   '/api/.env'
 ];
 

@@ -28,6 +28,7 @@ graph TB
         J2[Encode/Decode<br/>Base64 / URL / Hex 등]
         S[Security API<br/>Header Inspector]
         M[EdgeForge API<br/>Mock JSON Generator]
+        T[Tarpit API<br/>Endless Dummy Stream]
         I[Docs<br/>Swagger UI / OpenAPI]
     end
 
@@ -45,6 +46,7 @@ graph TB
     E --> J2
     E --> S
     E --> M
+    E --> T
     E --> I
     F -->|put / get / delete| J
     E -.->|Rate Limit Counter| J
@@ -66,6 +68,7 @@ graph TB
    ├── GET  /encode      → 텍스트 인코딩 (Base64, URL, Hex 등)
    ├── GET  /decode      → 데이터 디코딩
    ├── GET  /edgeforge   → 가짜(Mock) JSON 응답 생성
+   ├── GET  /.env 등     → Tarpit (악성 봇 대기용 무한 스트림 반환)
    ├── GET  /openapi.json → OpenAPI 3.0 스펙
    └── GET  / 또는 /docs  → Swagger UI
 ```
@@ -116,6 +119,7 @@ sequenceDiagram
 | **Encode/Decode** | 다양한 형식의 인코딩/디코딩 (Base64, URL, HTML, Hex 등) |
 | **Security API** | HTTP 보안 헤더 분석 및 등급 산출 |
 | **EdgeForge API (Beta)** | 테스트를 위한 가짜(Mock) JSON 응답 생성기 |
+| **Tarpit API** | 악성 봇 지연용 허니팟 API (`/.env` 등) |
 
 ---
 

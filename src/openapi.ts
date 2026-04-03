@@ -350,7 +350,7 @@ export const OPENAPI = {
       get: {
         tags: ['Tarpit'],
         summary: 'API Tarpit (Honeypot)',
-        description: '악성 봇과 스캐너를 묶어두기 위한 엔드포인트입니다. `/.env` 외에도 `/wp-admin`, `/.git/config` 등 자주 스캔되는 30여개의 경로에 접속할 경우 작동하며 30초 동안 1초 간격으로 무의미한 데이터를 흘려보냅니다.',
+        description: '악성 봇과 스캐너를 묶어두기 위한 엔드포인트입니다. `/.env` 외에도 `/wp-admin`, `/.git/config` 등 자주 스캔되는 60여 개의 취약점 경로에 접속할 경우 작동하며 30초 동안 1초 간격으로 무의미한 데이터를 흘려보냅니다.',
         responses: {
           '200': {
             description: 'Endless dummy JSON stream',
