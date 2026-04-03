@@ -297,6 +297,147 @@ curl "https://api.kalpha.kr/qr?type=geo&lat=37.5660&lng=126.9784" -o location.sv
 ```bash
 # Base64 인코딩
 curl "https://api.kalpha.kr/encode?text=hello&format=base64"
+```
+
+**응답:**
+```json
+{
+  "input": "hello",
+  "format": "base64",
+  "result": "aGVsbG8="
+}
+```
+
+### 디코딩
+
+```bash
+# Base64 디코딩
+curl "https://api.kalpha.kr/decode?data=aGVsbG8=&format=base64"
+```
+
+**응답:**
+```json
+{
+  "input": "aGVsbG8=",
+  "format": "base64",
+  "result": "hello"
+}
+```
+
+### 엔드포인트 요약
+
+| 메서드 | 경로 | 설명 |
+|--------|------|------|
+| `GET` | `/encode?text={text}&format={format}` | 텍스트 인코딩 |
+| `GET` | `/decode?data={data}&format={format}` | 데이터 디코딩 |
+
+---
+
+## Security API
+
+특정 웹사이트의 보안 헤더를 분석하여 점수(A~F)와 등급(0~100)을 산출합니다.
+
+### 헤더 분석
+
+```bash
+curl "https://api.kalpha.kr/security/headers?url=https://kalpha.kr"
+```
+
+**응답:**
+```json
+{
+  "url": "https://kalpha.kr",
+  "pageType": "normal",
+  "statusCode": 200,
+  "score": "A",
+  "grade": 85,
+  "headers": {
+    "X-Content-Type-Options": "nosniff"
+  },
+  "analysis": [
+    {
+      "header": "X-Content-Type-Options",
+      "status": "excellent",
+      "message": "nosniff is set properly"
+    }
+  ]
+}
+```
+
+### 엔드포인트 요약
+
+| 메서드 | 경로 | 설명 |
+|--------|------|------|
+| `GET` | `/security/headers?url={url}` | 웹사이트 보안 헤더 분석 |
+
+---
+
+## EdgeForge API (Beta)
+
+프론트엔드 개발이나 예외 처리를 테스트할 때 사용할 수 있는 **가짜(Mock) JSON 응답 생성기**입니다.
+
+### 커스텀 JSON 응답 생성
+
+HTTP 상태 코드와 지연 시간(Delay), 그리고 반환받고 싶은 JSON 바디를 쿼리 파라미터로 넘깁니다.
+
+```bash
+# 403 에러를 발생시키며, 2초(2000ms) 지연 후 응답
+curl "https://api.kalpha.kr/edgeforge?status=403&delay=2000&body={\"error\":\"Not%20Authorized\"}"
+```
+
+**응답 (HTTP 403 상태 & 2초 딜레이):**
+```json
+{
+  "error": "Not Authorized"
+}
+
+```
+
+### 엔드포인트 요약
+
+| 메서드 | 경로 | 설명 |
+|--------|------|------|
+| `GET / POST` | `/edgeforge` | 상태 코드(status), 지연(delay), 바디(body)를 받아 그대로 반환 |
+
+---
+
+## Tarpit API (Honeypot)
+
+악성 봇과 취약점 스캐너의 리소스(스레드)를 고갈시켜 방어하기 위한 재미있고 실용적인 API 타르핏입니다. 시스템 파일이나 크리덴셜, 취약 경로를 찌르는 요청을 가로채어 30초 동안 1초 간격으로 의미 없는 스트림 데이터를 끊어서 내려보냅니다.
+
+### 동작 방식
+
+스캐너가 봇넷으로 찔러볼 법한 약 60여 개의 주요 취약점 경로(`/wp-admin`, `/.env`, `/.git/config`, `/.ssh/id_rsa`, `/actuator` 등)에 접근할 때 자동으로 트리거됩니다. (HTTP 상태 코드 200 응답 후 진행 됨)
+
+```bash
+# 해커의 스크립트가 취약점을 찌르는 상황 가정:
+curl -N https://api.kalpha.kr/.env
+```
+
+**응답 (30초간 1초마다 1줄씩 지연 스트리밍 출력됨):**
+```json
+{
+  "status": "loading",
+  "data": [
+    {"id": 0, "hash": "uuid-1...", "status": "pending_validation"},
+    {"id": 1, "hash": "uuid-2...", "status": "pending_validation"},
+    ... (30초 동안 계속됨) ...
+    {"end": true}
+  ]
+}
+```
+
+> **왜 유용한가요?:** Cloudflare Workers에서는 I/O (네트워크 대기) 타이머가 과금되는 CPU 자원 소모 시간에 들어가지 않아 방어자쪽에는 페널티가 없습니다. 반면 스레드 풀을 무작정 늘릴 수 없는 공격자 측의 소켓 리소스를 최대치로 잡아먹을 수 있습니다.
+
+### 엔드포인트 요약
+
+| 메서드 | 경로 | 설명 |
+|--------|------|------|
+| `GET` | `/.env` 외 60여개 | 악성 봇 가두기 용도의 30초 무한 데이터 스트림 |
+
+---
+
+## 로컬 개발 및 배포
 
 # URL 인코딩
 curl "https://api.kalpha.kr/encode?text=hello world&format=url"
