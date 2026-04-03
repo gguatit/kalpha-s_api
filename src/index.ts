@@ -13,6 +13,7 @@ import { handleEncode, handleDecode } from './handlers/encode';
 import { handleSecurityHeaders } from './handlers/security';
 import { MAX_MESSAGE_LENGTH, UUID_REGEX, getCorsHeaders, isOriginAllowed, jsonResponse, withCors } from './helpers';
 import { handleEdgeForge } from './handlers/edgeforge';
+import { handleTarpit, tarpitPaths } from './handlers/tarpit';
 
 export type { Env };
 
@@ -29,6 +30,11 @@ export default {
         return respond(jsonResponse({ error: 'origin not allowed' }, 403));
       }
       return new Response(null, { status: 204, headers: getCorsHeaders(request, env) });
+    }
+
+    // Tarpit (Honeypot) - 악성 봇 요청을 먼저 낚아채서 30초 대기시킵니다.
+    if (tarpitPaths.includes(pathname)) {
+      return respond(handleTarpit(request));
     }
 
     // Auth
