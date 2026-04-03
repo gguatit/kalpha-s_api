@@ -15,6 +15,7 @@ export const OPENAPI = {
     { name: 'Encode/Decode', description: '다양한 형식의 인코딩/디코딩 (Base64, URL, HTML, Hex 등)' },
     { name: 'Security', description: '보안 관련 유틸리티 (헤더 점검 등)' },
     { name: 'EdgeForge (BETA)', description: '가짜(Mock) JSON 응답 생성기' },
+    { name: 'Fun / Easter Egg', description: '소소한 유틸리티 기능들' },
   ],
   components: {
     securitySchemes: {
@@ -117,6 +118,10 @@ export const OPENAPI = {
         },
         required: ['url', 'score', 'grade', 'headers', 'analysis'],
       },
+      TarpitResponse: {
+        type: 'string',
+        description: '악성 봇의 연결을 끊지 않고 1초마다 무의미한 JSON 스트림 데이터를 계속 보냅니다.'
+      }
     },
     'x-implementation': {
       description: '런타임/구현 관련 메타',

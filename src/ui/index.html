@@ -123,6 +123,12 @@
           <button class="btn" onclick="testEdgeForge()">테스트 실행</button>
           <pre id="edgeforgeResult" class="result-box"></pre>
         </div>
+        <div class="api-card">
+          <h3>Tarpit API (GET /.env 등)</h3>
+          <p>악성 스캐너/봇을 추적·대기시키기 위한 허니팟. <br/>1초 간격으로 무의미한 JSON 스트림 데이터를 반환하여 30초 동안 강제로 대기시킵니다.</p>
+          <button class="btn" onclick="testTarpit()">허니팟 테스트(.env)</button>
+          <pre id="tarpitResult" class="result-box"></pre>
+        </div>
       </div>
     </div>
 
@@ -139,6 +145,12 @@
       const el = document.getElementById(resultId);
       el.style.display = 'block';
       el.textContent = Array.isArray(content) ? content.join('\n') : String(content || '결과 없음');
+    }
+
+    function appendResult(resultId, content) {
+      const el = document.getElementById(resultId);
+      el.style.display = 'block';
+      el.textContent += content;
     }
 
     function parseJsonSafely(text) {
@@ -365,6 +377,34 @@
       apiCall('GET', '/security/headers?url=' + encodeURIComponent(val), 'securityResult');
     };
     window.testEdgeForge = () => apiCall('GET', '/edgeforge', 'edgeforgeResult');
+
+    window.testTarpit = async () => {
+      const resultId = 'tarpitResult';
+      const el = document.getElementById(resultId);
+      el.style.display = 'block';
+      el.textContent = '타르핏 탐지됨 (/.env). 데이터 30초 스트리밍 시작...\n';
+
+      try {
+        const response = await fetch('/.env');
+        if (!response.body) {
+          el.textContent += '스트림을 지원하지 않습니다.\n';
+          return;
+        }
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          // 실시간으로 텍스트 추가 후 스크롤을 맨 아래로 내림
+          el.textContent += decoder.decode(value);
+          el.scrollTop = el.scrollHeight;
+        }
+        el.textContent += '\n\n타르핏 스트림이 모두 종료되었습니다.';
+      } catch (err) {
+        el.textContent += '\n\n스트림 통신 중 오류가 발생했습니다: ' + err.message;
+      }
+    };
   </script>
 </body>
 </html>
