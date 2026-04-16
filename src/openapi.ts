@@ -121,22 +121,17 @@ export const OPENAPI = {
       EchCheckResponse: {
         type: 'object',
         properties: {
-          domain: { type: 'string', example: 'cloudflare.com' },
-          echSupported: { type: 'boolean', example: true },
-          publicName: { type: 'string', example: 'cloudflare-ech.com', nullable: true },
-          records: {
-            type: 'array',
-            items: {
-              type: 'object',
-              properties: {
-                priority: { type: 'integer', example: 1 },
-                targetName: { type: 'string', example: 'cloudflare-ech.com' },
-                ech: { type: 'string', example: 'AEX+DQB...==' },
-              },
-            },
-          },
+          echActive: { type: 'boolean', nullable: true, description: 'Whether ECH is active on the connection (null if undetectable)' },
+          echCapable: { type: 'boolean', example: true, description: 'Whether the connection supports ECH (requires TLS 1.3)' },
+          tlsVersion: { type: 'string', example: 'TLSv1.3', nullable: true },
+          tlsCipher: { type: 'string', example: 'TLS_AES_128_GCM_SHA256', nullable: true },
+          httpProtocol: { type: 'string', example: 'HTTP/2', nullable: true },
+          clientIp: { type: 'string', example: '203.0.113.1', nullable: true },
+          colo: { type: 'string', example: 'ICN', nullable: true, description: 'Cloudflare datacenter code' },
+          echIndicators: { type: 'array', items: { type: 'string' }, nullable: true, description: 'Raw ECH-related cf properties if found' },
+          message: { type: 'string', example: 'TLS 1.3 연결로 ECH 사용이 가능합니다.' },
         },
-        required: ['domain', 'echSupported', 'publicName', 'records'],
+        required: ['echActive', 'echCapable', 'tlsVersion', 'message'],
       },
       TarpitResponse: {
         type: 'string',
@@ -334,18 +329,13 @@ export const OPENAPI = {
     '/security/ech': {
       get: {
         tags: ['Security'],
-        summary: 'Check ECH (Encrypted Client Hello) support for a domain',
-        description: 'Queries DNS HTTPS/SVCB records via DNS-over-HTTPS to determine if a domain has published ECH configuration, indicating support for encrypted SNI.',
-        parameters: [
-          { name: 'domain', in: 'query', required: true, description: 'Domain name to check ECH support for', schema: { type: 'string' } },
-        ],
+        summary: 'Check if your client connection uses ECH',
+        description: 'Inspects the TLS connection from the requesting client to determine whether ECH (Encrypted Client Hello) is active, and whether the connection is capable of supporting ECH (requires TLS 1.3). No parameters needed — simply request this endpoint to check your own connection.',
         responses: {
           '200': {
             description: 'ECH check result',
             content: { 'application/json': { schema: { $ref: '#/components/schemas/EchCheckResponse' } } },
           },
-          '400': { description: 'Bad Request', content: { 'application/json': { schema: { $ref: '#/components/schemas/ErrorResponse' } } } },
-          '502': { description: 'DNS query failed', content: { 'application/json': { schema: { $ref: '#/components/schemas/ErrorResponse' } } } },
         },
       },
     },

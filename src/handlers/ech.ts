@@ -1,132 +1,78 @@
 import { jsonResponse } from '../helpers';
 
-interface DnsAnswer {
-    name: string;
-    type: number;
-    TTL: number;
-    data: string;
+interface CfProperties {
+    country?: string;
+    city?: string;
+    tlsVersion?: string;
+    tlsCipher?: string;
+    httpProtocol?: string;
+    clientIp?: string;
+    colo?: string;
+    [key: string]: unknown;
 }
 
-interface DnsResponse {
-    Status: number;
-    Answer?: DnsAnswer[];
-    Authority?: DnsAnswer[];
-    Additional?: DnsAnswer[];
-}
+export function handleEchCheck(request: Request): Response {
+    const cf = (request as any).cf as CfProperties | undefined;
 
-interface EchRecord {
-    priority: number;
-    targetName: string;
-    ech: string;
-}
+    const tlsVersion = cf?.tlsVersion ?? null;
+    const tlsCipher = cf?.tlsCipher ?? null;
+    const clientIp = cf?.clientIp ?? null;
+    const colo = cf?.colo ?? null;
+    const httpProtocol = cf?.httpProtocol ?? null;
 
-interface EchResult {
-    echSupported: boolean;
-    publicName: string | null;
-    records: EchRecord[];
-}
+    const isTls13 = tlsVersion === 'TLSv1.3';
 
-const DNS_OVER_HTTPS_URL = 'https://cloudflare-dns.com/dns-query';
+    const echIndicators: string[] = [];
+    let echActive: boolean | null = null;
 
-function parseSvcbData(data: string): EchRecord | null {
-    const parts = data.split(/\s+/);
-    if (parts.length < 2) return null;
-
-    const priority = parseInt(parts[0], 10);
-    if (isNaN(priority)) return null;
-
-    const targetName = parts[1];
-    let echValue: string | null = null;
-
-    for (let i = 2; i < parts.length; i++) {
-        const field = parts[i].toLowerCase();
-        if (field.startsWith('ech=')) {
-            echValue = parts[i].substring(4);
-            if (echValue.startsWith('"') && echValue.endsWith('"')) {
-                echValue = echValue.slice(1, -1);
-            }
-            break;
-        }
-    }
-
-    if (!echValue) return null;
-
-    return { priority, targetName, ech: echValue };
-}
-
-async function queryDnsRecord(domain: string, type: string): Promise<DnsResponse> {
-    const url = `${DNS_OVER_HTTPS_URL}?name=${encodeURIComponent(domain)}&type=${type}`;
-    const response = await fetch(url, {
-        headers: { 'Accept': 'application/dns-json' },
-    });
-
-    if (!response.ok) {
-        throw new Error(`DNS query failed: ${response.status}`);
-    }
-
-    return response.json() as Promise<DnsResponse>;
-}
-
-async function checkEchForDomain(domain: string): Promise<EchResult> {
-    const [httpsResult, svcbResult] = await Promise.allSettled([
-        queryDnsRecord(domain, 'HTTPS'),
-        queryDnsRecord(domain, 'SVCB'),
-    ]);
-
-    const echRecords: EchRecord[] = [];
-    let publicName: string | null = null;
-
-    const processAnswers = (result: PromiseSettledResult<DnsResponse>) => {
-        if (result.status !== 'fulfilled') return;
-        const dnsResp = result.value;
-        if (!dnsResp.Answer) return;
-
-        for (const answer of dnsResp.Answer) {
-            const parsed = parseSvcbData(answer.data);
-            if (parsed) {
-                echRecords.push(parsed);
-                if (parsed.targetName !== '.' && !publicName) {
-                    publicName = parsed.targetName;
-                }
+    if (cf) {
+        const cfKeys = Object.keys(cf);
+        for (const key of cfKeys) {
+            const lower = key.toLowerCase();
+            if (lower.includes('ech')) {
+                echIndicators.push(`${key}: ${String(cf[key])}`);
             }
         }
-    };
-
-    processAnswers(httpsResult);
-    processAnswers(svcbResult);
-
-    const echSupported = echRecords.length > 0;
-    if (echSupported && !publicName) {
-        publicName = domain;
     }
 
-    return { echSupported, publicName, records: echRecords };
-}
-
-export async function handleEchCheck(request: Request): Promise<Response> {
-    const url = new URL(request.url);
-    const domain = url.searchParams.get('domain')?.trim().toLowerCase();
-
-    if (!domain) {
-        return jsonResponse({ error: 'missing domain parameter' }, 400);
-    }
-
-    const domainRegex = /^(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$/;
-    if (!domainRegex.test(domain)) {
-        return jsonResponse({ error: 'invalid domain format' }, 400);
-    }
-
-    try {
-        const result = await checkEchForDomain(domain);
-
-        return jsonResponse({
-            domain,
-            echSupported: result.echSupported,
-            publicName: result.publicName,
-            records: result.records,
+    if (echIndicators.length > 0) {
+        const indicatorValues = echIndicators.map(i => {
+            const val = i.split(': ')[1]?.toLowerCase();
+            return val;
         });
-    } catch (e) {
-        console.error('[GET /security/ech] error:', e);
-        return jsonResponse({ error: 'failed to query dns records' }, 502);
+        if (indicatorValues.some(v => v === 'true' || v === '1' || v === 'yes')) {
+            echActive = true;
+        } else if (indicatorValues.some(v => v === 'false' || v === '0' || v === 'no')) {
+            echActive = false;
+        }
     }
+
+    let message: string;
+    if (echActive === true) {
+        message = '현재 연결에서 ECH(Encrypted Client Hello)가 활성화되어 있습니다. SNI가 암호화되어 전송되고 있습니다.';
+    } else if (echActive === false) {
+        if (isTls13) {
+            message = 'TLS 1.3을 사용 중이나 ECH가 감지되지 않았습니다. 브라우저 또는 서버 측 ECH 설정을 확인하세요.';
+        } else {
+            message = 'ECH가 비활성화되어 있으며, TLS 버전도 1.3 미만입니다. ECH를 사용하려면 TLS 1.3이 필요합니다.';
+        }
+    } else {
+        if (isTls13) {
+            message = 'TLS 1.3 연결로 ECH 사용이 가능합니다. ECH 활성화 여부는 서버 측에서 직접 확인할 수 없어, 서비스 제공자의 ECH 설정 여부에 따라 결정됩니다.';
+        } else {
+            message = 'TLS 1.3 미만 연결입니다. ECH를 사용하려면 TLS 1.3 이상이 필요합니다.';
+        }
+    }
+
+    return jsonResponse({
+        echActive,
+        echCapable: isTls13,
+        tlsVersion,
+        tlsCipher,
+        httpProtocol,
+        clientIp,
+        colo,
+        echIndicators: echIndicators.length > 0 ? echIndicators : null,
+        message,
+    });
 }
