@@ -11,6 +11,7 @@ import { handleIpFull, handleIpSimple } from './handlers/ip';
 import { handleQr } from './handlers/qr';
 import { handleEncode, handleDecode } from './handlers/encode';
 import { handleSecurityHeaders } from './handlers/security';
+import { handleEchCheck } from './handlers/ech';
 import { MAX_MESSAGE_LENGTH, UUID_REGEX, getCorsHeaders, isOriginAllowed, jsonResponse, withCors } from './helpers';
 import { handleEdgeForge } from './handlers/edgeforge';
 import { handleTarpit, tarpitPaths } from './handlers/tarpit';
@@ -170,6 +171,11 @@ export default {
     // GET /security/headers — 보안 헤더 점검
     if (request.method === 'GET' && pathname === '/security/headers') {
       return respond(await handleSecurityHeaders(request));
+    }
+
+    // GET /security/ech — ECH 지원 여부 점검
+    if (request.method === 'GET' && pathname === '/security/ech') {
+      return respond(await handleEchCheck(request));
     }
 
     // ─── EdgeForge (BETA) ──────────────────────────

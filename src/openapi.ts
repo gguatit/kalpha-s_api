@@ -118,6 +118,26 @@ export const OPENAPI = {
         },
         required: ['url', 'score', 'grade', 'headers', 'analysis'],
       },
+      EchCheckResponse: {
+        type: 'object',
+        properties: {
+          domain: { type: 'string', example: 'cloudflare.com' },
+          echSupported: { type: 'boolean', example: true },
+          publicName: { type: 'string', example: 'cloudflare-ech.com', nullable: true },
+          records: {
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                priority: { type: 'integer', example: 1 },
+                targetName: { type: 'string', example: 'cloudflare-ech.com' },
+                ech: { type: 'string', example: 'AEX+DQB...==' },
+              },
+            },
+          },
+        },
+        required: ['domain', 'echSupported', 'publicName', 'records'],
+      },
       TarpitResponse: {
         type: 'string',
         description: '악성 봇의 연결을 끊지 않고 1초마다 무의미한 JSON 스트림 데이터를 계속 보냅니다.'
@@ -308,6 +328,24 @@ export const OPENAPI = {
             content: { 'application/json': { schema: { $ref: '#/components/schemas/SecurityHeaderResponse' } } },
           },
           '400': { description: 'Bad Request', content: { 'application/json': { schema: { $ref: '#/components/schemas/ErrorResponse' } } } },
+        },
+      },
+    },
+    '/security/ech': {
+      get: {
+        tags: ['Security'],
+        summary: 'Check ECH (Encrypted Client Hello) support for a domain',
+        description: 'Queries DNS HTTPS/SVCB records via DNS-over-HTTPS to determine if a domain has published ECH configuration, indicating support for encrypted SNI.',
+        parameters: [
+          { name: 'domain', in: 'query', required: true, description: 'Domain name to check ECH support for', schema: { type: 'string' } },
+        ],
+        responses: {
+          '200': {
+            description: 'ECH check result',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/EchCheckResponse' } } },
+          },
+          '400': { description: 'Bad Request', content: { 'application/json': { schema: { $ref: '#/components/schemas/ErrorResponse' } } } },
+          '502': { description: 'DNS query failed', content: { 'application/json': { schema: { $ref: '#/components/schemas/ErrorResponse' } } } },
         },
       },
     },
